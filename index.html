@@ -1,0 +1,1960 @@
+<meta charset="utf-8">
+<title>えいごのもり 🐥</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<meta name="theme-color" content="#FF6B81">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="えいごのもり">
+<style>
+  :root {
+    --bg: #FFFDF8;
+    --card: #FFFFFF;
+    --ink: #3D3A50;
+    --ink-soft: #8B87A0;
+    --coral: #FF6B81;
+    --sunny: #FFB830;
+    --mint: #2EC48D;
+    --sky: #3FA9F5;
+    --lavender: #9B7DE4;
+    --peach: #FF9770;
+    --line: #F0EBE0;
+    --shadow: 0 4px 14px rgba(90, 80, 120, 0.10);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: ui-rounded, "Hiragino Maru Gothic ProN", "Zen Maru Gothic", "BIZ UDPGothic", "Hiragino Sans", sans-serif;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  #app {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+  }
+
+  /* ---------- header ---------- */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px 10px;
+  }
+  header .logo {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+  header .stars {
+    background: #FFF3D6;
+    color: #B07900;
+    border: 2px solid #FFE1A0;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 14px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  /* ---------- learning log ---------- */
+  .log-card {
+    background: var(--card);
+    border: 3px solid var(--line);
+    border-radius: 22px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .log-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    text-align: center;
+  }
+  .log-stat .num { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .log-stat .lbl { font-size: 11px; color: var(--ink-soft); font-weight: 800; margin-top: 2px; }
+  .log-streak {
+    text-align: center;
+    font-weight: 800;
+    margin-top: 12px;
+    font-size: 14px;
+    color: #B07900;
+  }
+  .log-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    background: var(--card);
+    border: 2px solid var(--line);
+    border-radius: 14px;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .log-row .d { color: var(--ink-soft); flex: none; }
+  .btn-primary:disabled { opacity: 0.55; cursor: default; }
+
+  main { flex: 1; padding: 4px 16px 96px; }
+
+  /* ---------- bottom nav ---------- */
+  nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    background: var(--card);
+    border-top: 2px solid var(--line);
+    padding: 6px 6px calc(8px + env(safe-area-inset-bottom));
+    gap: 4px;
+  }
+  nav button {
+    flex: 1;
+    border: none;
+    background: transparent;
+    border-radius: 16px;
+    padding: 8px 2px 6px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  nav button .nav-emoji { display: block; font-size: 21px; margin-bottom: 2px; }
+  nav button.active { background: #FFF0F3; color: var(--coral); }
+
+  /* ---------- shared ---------- */
+  .screen { display: none; }
+  .screen.show { display: block; }
+  h2.title {
+    font-size: 17px;
+    margin: 10px 2px 12px;
+    text-wrap: balance;
+  }
+  .note { color: var(--ink-soft); font-size: 13px; font-weight: 700; margin: 0 2px 12px; }
+  .back-btn {
+    border: 2px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 8px 16px;
+    margin: 8px 0 4px;
+    cursor: pointer;
+  }
+  button:focus-visible, .cat-card:focus-visible, .flip-card:focus-visible {
+    outline: 3px solid var(--sky);
+    outline-offset: 2px;
+  }
+
+  /* ---------- category grid ---------- */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .cat-card {
+    border: none;
+    border-radius: 22px;
+    padding: 16px 12px 14px;
+    text-align: center;
+    color: #fff;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  .cat-card .cat-emoji { font-size: 34px; display: block; }
+  .cat-card .cat-name { font-size: 15px; font-weight: 800; display: block; margin-top: 6px; }
+  .cat-card .cat-progress {
+    display: inline-block;
+    margin-top: 8px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 12px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- flashcard ---------- */
+  .card-stage { perspective: 1000px; margin-top: 8px; }
+  .flip-card {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    transform-style: preserve-3d;
+    transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.3, 1.1);
+    cursor: pointer;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .flip-card { transition: none; }
+  }
+  .flip-card.flipped { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    background: var(--card);
+    border: 3px solid var(--line);
+    border-radius: 28px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 20px;
+  }
+  .card-face.back { transform: rotateY(180deg); }
+  .card-emoji { font-size: 64px; line-height: 1; }
+  .card-en { font-size: 38px; font-weight: 800; letter-spacing: 0.01em; text-align: center; text-wrap: balance; }
+  .card-kana { font-size: 15px; color: var(--ink-soft); font-weight: 700; }
+  .card-ja { font-size: 28px; font-weight: 800; text-align: center; text-wrap: balance; }
+  .card-hint { font-size: 12px; color: var(--ink-soft); font-weight: 700; margin-top: 10px; }
+  .card-learned-mark {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    font-size: 24px;
+  }
+
+  .word-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .round-btn {
+    border: none;
+    border-radius: 999px;
+    font-family: inherit;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  .btn-arrow {
+    width: 58px;
+    height: 58px;
+    font-size: 24px;
+    background: var(--card);
+    border: 3px solid var(--line);
+    color: var(--ink);
+  }
+  .btn-speak {
+    width: 84px;
+    height: 84px;
+    font-size: 38px;
+    background: var(--sky);
+    color: #fff;
+  }
+  .btn-speak:active { transform: scale(0.94); }
+  .learned-row { text-align: center; margin-top: 16px; }
+  .btn-learned {
+    border: 3px solid #FFE1A0;
+    background: #FFF9EC;
+    color: #B07900;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 800;
+    padding: 12px 26px;
+    cursor: pointer;
+  }
+  .btn-learned.on { background: var(--sunny); border-color: var(--sunny); color: #fff; }
+  .word-counter {
+    text-align: center;
+    color: var(--ink-soft);
+    font-weight: 800;
+    font-size: 14px;
+    margin-top: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- quiz ---------- */
+  .mode-row {
+    display: flex;
+    gap: 8px;
+    margin: 0 0 14px;
+  }
+  .mode-pill {
+    flex: 1;
+    border: 3px solid var(--line);
+    background: var(--card);
+    color: var(--ink-soft);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 10px 8px;
+    cursor: pointer;
+  }
+  .mode-pill.active { border-color: var(--coral); color: var(--coral); background: #FFF0F3; }
+  .quiz-q-card {
+    background: var(--card);
+    border: 3px solid var(--line);
+    border-radius: 28px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    padding: 24px 16px;
+    margin-top: 8px;
+  }
+  .quiz-progress {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    margin: 6px 0 14px;
+  }
+  .quiz-progress span {
+    width: 12px; height: 12px;
+    border-radius: 999px;
+    background: var(--line);
+  }
+  .quiz-progress span.hit { background: var(--mint); }
+  .quiz-progress span.miss { background: var(--coral); }
+  .quiz-progress span.now { background: var(--sunny); }
+  .choices { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .choice-btn {
+    border: 3px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 800;
+    border-radius: 18px;
+    padding: 15px 14px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .choice-btn.correct { background: #E2F8EE; border-color: var(--mint); color: #0E8A5F; }
+  .choice-btn.wrong { background: #FFECEF; border-color: var(--coral); color: #D63E56; }
+  .choice-btn:disabled { cursor: default; }
+  .quiz-feedback {
+    min-height: 30px;
+    text-align: center;
+    font-size: 19px;
+    font-weight: 800;
+    margin-top: 14px;
+  }
+  .quiz-next-row { text-align: center; margin-top: 10px; }
+  .btn-primary {
+    border: none;
+    background: var(--coral);
+    color: #fff;
+    font-family: inherit;
+    font-size: 17px;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 14px 34px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  .quiz-result {
+    text-align: center;
+    background: var(--card);
+    border: 3px solid var(--line);
+    border-radius: 28px;
+    box-shadow: var(--shadow);
+    padding: 30px 16px;
+    margin-top: 12px;
+  }
+  .quiz-result .big { font-size: 52px; }
+  .quiz-result .score { font-size: 26px; font-weight: 800; margin: 10px 0 4px; font-variant-numeric: tabular-nums; }
+  .quiz-result .msg { font-size: 16px; font-weight: 800; color: var(--ink-soft); margin-bottom: 18px; }
+
+  /* ---------- phrases ---------- */
+  .phrase-group-title {
+    font-size: 15px;
+    font-weight: 800;
+    margin: 20px 2px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .phrase-group-title .chip {
+    color: #fff;
+    border-radius: 999px;
+    padding: 3px 14px;
+  }
+  .phrase-list { display: flex; flex-direction: column; gap: 8px; }
+  .phrase-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    border: 2px solid var(--line);
+    border-radius: 18px;
+    padding: 12px 12px;
+  }
+  .phrase-row .p-emoji { font-size: 24px; }
+  .phrase-row .p-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .phrase-row .p-en { font-size: 17px; font-weight: 800; }
+  .phrase-row .p-kana { font-size: 11px; color: var(--ink-soft); font-weight: 700; margin-top: 1px; }
+  .phrase-row .p-ja { font-size: 13px; color: var(--ink-soft); font-weight: 700; margin-top: 2px; }
+  .p-speak {
+    border: none;
+    background: #E7F4FE;
+    color: var(--sky);
+    width: 46px;
+    height: 46px;
+    border-radius: 999px;
+    font-size: 20px;
+    cursor: pointer;
+    flex: none;
+  }
+  .p-speak:active { transform: scale(0.92); }
+
+  /* ---------- dialogues ---------- */
+  .dlg-card {
+    background: var(--card);
+    border: 3px solid var(--line);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    padding: 16px 14px;
+    margin-bottom: 16px;
+  }
+  .dlg-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .dlg-head .dlg-emoji { font-size: 28px; }
+  .dlg-head .dlg-title { flex: 1; font-size: 16px; font-weight: 800; }
+  .dlg-play-all {
+    border: none;
+    background: var(--mint);
+    color: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 10px 16px;
+    cursor: pointer;
+    flex: none;
+  }
+  .dlg-lines { display: flex; flex-direction: column; gap: 10px; }
+  .dlg-line { display: flex; gap: 8px; align-items: flex-end; }
+  .dlg-line.b { flex-direction: row-reverse; }
+  .dlg-bubble {
+    max-width: 82%;
+    border-radius: 18px;
+    padding: 10px 14px;
+    cursor: pointer;
+  }
+  .dlg-line.a .dlg-bubble { background: #EAF5FF; border: 2px solid #C9E6FF; border-bottom-left-radius: 6px; }
+  .dlg-line.b .dlg-bubble { background: #FFF0F3; border: 2px solid #FFD6DD; border-bottom-right-radius: 6px; }
+  .dlg-en { font-size: 15px; font-weight: 800; display: block; }
+  .dlg-kana { font-size: 10px; color: var(--ink-soft); font-weight: 700; display: block; margin-top: 1px; }
+  .dlg-ja { font-size: 12px; color: var(--ink-soft); font-weight: 700; display: block; margin-top: 2px; }
+  .dlg-who {
+    flex: none;
+    width: 30px; height: 30px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .dlg-line.a .dlg-who { background: #D6ECFF; }
+  .dlg-line.b .dlg-who { background: #FFE0E6; }
+
+  /* ---------- dictionary ---------- */
+  .dict-search { display: flex; gap: 8px; margin-bottom: 14px; }
+  .dict-search input {
+    flex: 1;
+    min-width: 0;
+    border: 3px solid var(--line);
+    border-radius: 999px;
+    padding: 12px 18px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--card);
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .dict-search input:focus { border-color: var(--sky); }
+  .dict-search button {
+    border: none;
+    background: var(--sky);
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 12px 20px;
+    cursor: pointer;
+    flex: none;
+  }
+  .dict-entry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    border: 2px solid var(--line);
+    border-radius: 18px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .dict-entry .d-text { flex: 1; min-width: 0; }
+  .dict-entry .d-word { font-size: 17px; font-weight: 800; overflow-wrap: break-word; }
+  .dict-entry .d-mean { font-size: 13px; color: var(--ink-soft); font-weight: 700; margin-top: 2px; line-height: 1.6; overflow-wrap: break-word; }
+  .dict-section-label { font-size: 13px; font-weight: 800; color: var(--ink-soft); margin: 16px 2px 8px; }
+  .dict-msg { color: var(--ink-soft); font-weight: 700; font-size: 14px; text-align: center; margin-top: 24px; line-height: 1.8; }
+</style>
+
+<div id="app">
+  <header>
+    <div class="logo">🐥 えいごのもり</div>
+    <button class="stars" id="starBtn">⭐ <span id="starCount">0</span> ・記録</button>
+  </header>
+
+  <main>
+    <!-- たんご: カテゴリ一覧 -->
+    <section class="screen" id="screen-cats">
+      <h2 class="title">カテゴリを選ぼう</h2>
+      <div class="cat-grid" id="catGrid"></div>
+    </section>
+
+    <!-- たんご: カード -->
+    <section class="screen" id="screen-cards">
+      <button class="back-btn" id="cardsBack">← もどる</button>
+      <h2 class="title" id="cardsTitle"></h2>
+      <div class="card-stage">
+        <div class="flip-card" id="flipCard" role="button" tabindex="0" aria-label="カードをめくる">
+          <div class="card-face front">
+            <span class="card-learned-mark" id="learnedMark"></span>
+            <div class="card-emoji" id="cardEmoji"></div>
+            <div class="card-en" id="cardEn"></div>
+            <div class="card-kana" id="cardKana"></div>
+            <div class="card-hint">タップで答えを見る</div>
+          </div>
+          <div class="card-face back">
+            <div class="card-emoji" id="cardEmojiB"></div>
+            <div class="card-ja" id="cardJa"></div>
+            <div class="card-hint">もう一度タップでもどる</div>
+          </div>
+        </div>
+      </div>
+      <div class="word-controls">
+        <button class="round-btn btn-arrow" id="prevWord" aria-label="前の単語">◀</button>
+        <button class="round-btn btn-speak" id="speakWord" aria-label="発音を聞く">🔊</button>
+        <button class="round-btn btn-arrow" id="nextWord" aria-label="次の単語">▶</button>
+      </div>
+      <div class="learned-row">
+        <button class="btn-learned" id="learnedBtn">⭐ 覚えた！</button>
+      </div>
+      <div class="word-counter" id="wordCounter"></div>
+    </section>
+
+    <!-- クイズ: カテゴリ選択 -->
+    <section class="screen" id="screen-quiz-pick">
+      <h2 class="title">クイズに挑戦！🎯</h2>
+      <p class="note">英語の意味を当てよう（全10問）</p>
+      <div class="mode-row">
+        <button class="mode-pill active" id="modeNormal">👀 見て+聞いて</button>
+        <button class="mode-pill" id="modeListen">🎧 聞き取りチャレンジ</button>
+      </div>
+      <div class="cat-grid" id="quizCatGrid"></div>
+    </section>
+
+    <!-- クイズ: 出題 -->
+    <section class="screen" id="screen-quiz">
+      <button class="back-btn" id="quizBack">← やめる</button>
+      <div class="quiz-progress" id="quizProgress"></div>
+      <div class="quiz-q-card">
+        <div class="card-emoji" id="quizEmoji"></div>
+        <div class="card-en" id="quizEn"></div>
+        <div class="word-controls" style="margin-top:10px">
+          <button class="round-btn btn-speak" id="quizSpeak" aria-label="もう一度聞く">🔊</button>
+        </div>
+      </div>
+      <div class="choices" id="quizChoices"></div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <div class="quiz-next-row"><button class="btn-primary" id="quizNext" style="display:none">次へ ▶</button></div>
+    </section>
+
+    <!-- クイズ: 結果 -->
+    <section class="screen" id="screen-quiz-result">
+      <div class="quiz-result">
+        <div class="big" id="resultEmoji">🎉</div>
+        <div class="score" id="resultScore"></div>
+        <div class="msg" id="resultMsg"></div>
+        <button class="btn-primary" id="resultRetry">もう一度遊ぶ</button>
+      </div>
+    </section>
+
+    <!-- フレーズ -->
+    <section class="screen" id="screen-phrases">
+      <h2 class="title">使ってみよう！フレーズ 💬</h2>
+      <p class="note">🔊で聞いて、声に出してまねしてみよう</p>
+      <div id="phraseArea"></div>
+    </section>
+
+    <!-- かいわ -->
+    <section class="screen" id="screen-dialogues">
+      <h2 class="title">会話レッスン 🗣️</h2>
+      <p class="note">▶で通して聞ける。ふきだしをタップすると1文ずつ聞けるよ。<br>Bになりきって声に出すのがおすすめ！</p>
+      <div id="dialogueArea"></div>
+    </section>
+
+    <!-- じしょ -->
+    <section class="screen" id="screen-dict">
+      <h2 class="title">英語辞書 🔍</h2>
+      <p class="note">英語でも日本語でも検索できるよ（約4.5万語＋日本のことば🇯🇵・通信なしで動く）</p>
+      <div class="dict-search">
+        <input id="dictInput" type="search" placeholder="例: courage ／ 勇気" autocomplete="off" autocapitalize="none">
+        <button id="dictGo">検索</button>
+      </div>
+      <div id="dictResults">
+        <p class="dict-msg">アプリにのっていない単語も<br>ここで調べられるよ 🔍<br><br>英語 → 意味（発音も聞ける）<br>日本語 → 英単語さがし<br><br>🇯🇵 風鈴・障子・おにぎり など<br>「日本のことば」も英語にできるよ</p>
+      </div>
+      <div class="dict-section-label">📷 写真から翻訳</div>
+      <p class="note">英語が写った写真をとると、読み取って日本語にするよ（このときだけ通信を使うよ）</p>
+      <div class="quiz-next-row" style="text-align:center">
+        <label class="btn-primary" style="display:inline-block;cursor:pointer">📷 写真をとる・えらぶ<input id="camInput" type="file" accept="image/*" capture="environment" style="display:none"></label>
+      </div>
+      <div id="camResult"></div>
+    </section>
+
+    <!-- 学習きろく -->
+    <section class="screen" id="screen-log">
+      <button class="back-btn" id="logBack">← もどる</button>
+      <h2 class="title">学習記録 📈</h2>
+      <div id="logToday"></div>
+      <div class="quiz-next-row" style="margin:18px 0 6px">
+        <button class="btn-primary" id="reviewBtn">📝 今日の振り返りクイズ</button>
+      </div>
+      <p class="note" style="text-align:center">今日 見た・覚えた・まちがえた単語から<br>自動で問題を作るよ（まちがえた単語を優先）</p>
+      <div class="dict-section-label">これまでの記録</div>
+      <div id="logHistory"></div>
+      <div class="dict-section-label">バックアップ・ひっこし 🎒</div>
+      <p class="note">スマホを買いかえる前に「コードを出す」→LINEのキープなどに貼っておこう。新しいスマホで「コードを入れる」と⭐と記録がもどるよ</p>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="back-btn" id="exportBtn">📤 コードを出す</button>
+        <button class="back-btn" id="importBtn">📥 コードを入れる</button>
+      </div>
+      <textarea id="portArea" style="display:none;width:100%;height:110px;margin-top:10px;border:3px solid var(--line);border-radius:14px;padding:10px;font-family:inherit;font-size:12px;color:var(--ink);background:var(--card)"></textarea>
+      <div class="quiz-next-row"><button class="btn-primary" id="importGo" style="display:none">この記録を読み込む</button></div>
+      <p class="dict-msg" id="portMsg" style="margin-top:8px"></p>
+    </section>
+  </main>
+
+  <nav>
+    <button id="nav-words" class="active"><span class="nav-emoji">📚</span>単語</button>
+    <button id="nav-quiz"><span class="nav-emoji">🎯</span>クイズ</button>
+    <button id="nav-phrases"><span class="nav-emoji">💬</span>フレーズ</button>
+    <button id="nav-dialogues"><span class="nav-emoji">🗣️</span>会話</button>
+    <button id="nav-dict"><span class="nav-emoji">🔍</span>辞書</button>
+  </nav>
+</div>
+
+
+
+<script>
+"use strict";
+
+/* ================= 単語データ ================= */
+/* words: [英語, カタカナ読み, 日本語, 絵文字] */
+const CATS = [
+  { id: "animals", name: "どうぶつ", emoji: "🐶", color: "var(--coral)", words: [
+    ["dog","ドッグ","犬","🐶"],["cat","キャット","ねこ","🐱"],["rabbit","ラビット","うさぎ","🐰"],
+    ["bird","バード","鳥","🐦"],["fish","フィッシュ","魚","🐟"],["bear","ベア","くま","🐻"],
+    ["lion","ライオン","ライオン","🦁"],["elephant","エレファント","象","🐘"],["monkey","モンキー","さる","🐵"],
+    ["panda","パンダ","パンダ","🐼"],["tiger","タイガー","とら","🐯"],["horse","ホース","馬","🐴"],
+    ["pig","ピッグ","ぶた","🐷"],["cow","カウ","牛","🐮"],["frog","フロッグ","かえる","🐸"],
+    ["penguin","ペンギン","ペンギン","🐧"],["sheep","シープ","羊","🐑"],["snake","スネイク","へび","🐍"],
+    ["dolphin","ドルフィン","イルカ","🐬"],["whale","ホエール","クジラ","🐳"],
+    ["giraffe","ジラフ","キリン","🦒"],["koala","コアラ","コアラ","🐨"],
+    ["fox","フォックス","キツネ","🦊"],["wolf","ウルフ","オオカミ","🐺"],["owl","アウル","フクロウ","🦉"],
+    ["eagle","イーグル","ワシ","🦅"],["shark","シャーク","サメ","🦈"],["octopus","オクトパス","タコ","🐙"],
+    ["turtle","タートル","カメ","🐢"],["deer","ディア","シカ","🦌"],["squirrel","スクワレル","リス","🐿️"],
+    ["mouse","マウス","ネズミ","🐭"],["goat","ゴート","ヤギ","🐐"],["butterfly","バタフライ","チョウ","🦋"]
+  ]},
+  { id: "food", name: "たべもの", emoji: "🍎", color: "var(--peach)", words: [
+    ["apple","アップル","りんご","🍎"],["banana","バナナ","バナナ","🍌"],["orange","オレンジ","みかん","🍊"],
+    ["grape","グレープ","ぶどう","🍇"],["peach","ピーチ","もも","🍑"],["strawberry","ストロベリー","いちご","🍓"],
+    ["fruit","フルーツ","果物","🍉"],["vegetable","ベジタブル","野菜","🥦"],["meat","ミート","肉","🍖"],
+    ["egg","エッグ","卵","🥚"],["bread","ブレッド","パン","🍞"],["rice","ライス","ご飯","🍚"],
+    ["milk","ミルク","牛乳","🥛"],["water","ウォーター","水","💧"],["juice","ジュース","ジュース","🧃"],
+    ["tea","ティー","お茶","🍵"],["salad","サラダ","サラダ","🥗"],["soup","スープ","スープ","🍲"],
+    ["curry","カレー","カレー","🍛"],["hamburger","ハンバーガー","ハンバーガー","🍔"],["pizza","ピザ","ピザ","🍕"],
+    ["cake","ケーキ","ケーキ","🍰"],["ice cream","アイスクリーム","アイスクリーム","🍦"],["chocolate","チョコレート","チョコレート","🍫"],
+    ["tomato","トメイトウ","トマト","🍅"],["breakfast","ブレックファスト","朝ご飯","🍳"],["dinner","ディナー","夕ご飯","🍽️"],
+    ["watermelon","ウォーターメロン","スイカ","🍉"],["melon","メロン","メロン","🍈"],["pineapple","パイナップル","パイナップル","🍍"],
+    ["cherry","チェリー","サクランボ","🍒"],["lemon","レモン","レモン","🍋"],["potato","ポテイトウ","ジャガイモ","🥔"],
+    ["onion","オニオン","タマネギ","🧅"],["corn","コーン","トウモロコシ","🌽"],["cucumber","キューカンバー","キュウリ","🥒"],
+    ["mushroom","マッシュルーム","キノコ","🍄"],["noodles","ヌードルズ","めん類","🍜"],["sandwich","サンドウィッチ","サンドイッチ","🥪"],
+    ["cheese","チーズ","チーズ","🧀"],["dessert","デザート","デザート","🍮"]
+  ]},
+  { id: "colors", name: "いろ・かたち", emoji: "🌈", color: "var(--lavender)", words: [
+    ["red","レッド","赤","❤️"],["blue","ブルー","青","💙"],["yellow","イエロー","黄色","💛"],
+    ["green","グリーン","緑","💚"],["pink","ピンク","ピンク","💗"],["purple","パープル","むらさき","💜"],
+    ["orange","オレンジ","オレンジ色","🧡"],["white","ホワイト","白","🤍"],["black","ブラック","黒","🖤"],
+    ["brown","ブラウン","茶色","🤎"],["circle","サークル","丸","⭕"],["triangle","トライアングル","三角","🔺"],
+    ["heart","ハート","ハート","💖"],["star","スター","星","⭐"],
+    ["gray","グレイ","灰色","🌫️"],["gold","ゴールド","金色","🪙"],["silver","シルバー","銀色","🥈"],
+    ["light blue","ライト ブルー","水色","💠"],["square","スクエア","四角","⬜"],["diamond","ダイアモンド","ひし形・ダイヤ","💎"],
+    ["dark","ダーク","暗い","🌑"],["bright","ブライト","明るい","🔆"]
+  ]},
+  { id: "numbers", name: "かず", emoji: "🔢", color: "var(--sky)", words: [
+    ["one","ワン","1","1️⃣"],["two","トゥー","2","2️⃣"],["three","スリー","3","3️⃣"],
+    ["four","フォー","4","4️⃣"],["five","ファイブ","5","5️⃣"],["six","シックス","6","6️⃣"],
+    ["seven","セブン","7","7️⃣"],["eight","エイト","8","8️⃣"],["nine","ナイン","9","9️⃣"],
+    ["ten","テン","10","🔟"],["eleven","イレブン","11","🔢"],["twelve","トゥエルブ","12","🔢"],
+    ["thirteen","サーティーン","13","🔢"],["twenty","トゥエンティ","20","🔢"],["thirty","サーティ","30","🔢"],
+    ["forty","フォーティ","40","🔢"],["fifty","フィフティ","50","🔢"],["hundred","ハンドレッド","100","💯"],
+    ["thousand","サウザンド","1000","🔢"],["first","ファースト","1番目","🥇"],
+    ["second","セカンド","2番目","🥈"],["third","サード","3番目","🥉"],
+    ["zero","ズィーロウ","0","0️⃣"],["fourteen","フォーティーン","14","🔢"],["fifteen","フィフティーン","15","🔢"],
+    ["sixteen","シックスティーン","16","🔢"],["seventeen","セブンティーン","17","🔢"],["eighteen","エイティーン","18","🔢"],
+    ["nineteen","ナインティーン","19","🔢"],["sixty","シックスティ","60","🔢"],["seventy","セブンティ","70","🔢"],
+    ["eighty","エイティ","80","🔢"],["ninety","ナインティ","90","🔢"],["million","ミリオン","100万","🤑"],
+    ["half","ハーフ","半分","🌗"]
+  ]},
+  { id: "school", name: "がっこう", emoji: "🏫", color: "var(--mint)", words: [
+    ["school","スクール","学校","🏫"],["teacher","ティーチャー","先生","🧑‍🏫"],["friend","フレンド","友達","🧑‍🤝‍🧑"],
+    ["book","ブック","本","📖"],["notebook","ノートブック","ノート","📓"],["pen","ペン","ペン","🖊️"],
+    ["pencil","ペンシル","えんぴつ","✏️"],["eraser","イレイサー","消しゴム","🧽"],["ruler","ルーラー","定規","📏"],
+    ["scissors","シザーズ","はさみ","✂️"],["bag","バッグ","かばん","🎒"],["lunch","ランチ","昼ご飯・給食","🍱"],
+    ["homework","ホームワーク","宿題","📝"],["English","イングリッシュ","英語","🔤"],
+    ["math","マス","算数","➗"],["science","サイエンス","理科","🔬"],
+    ["social studies","ソーシャル スタディーズ","社会","🌏"],["P.E.","ピー イー","体育","🏅"],
+    ["music","ミュージック","音楽","🎵"],["club","クラブ","クラブ・部活","🎺"],
+    ["test","テスト","テスト","📄"],["question","クエスチョン","質問","❓"],["answer","アンサー","答え","💡"],
+    ["classroom","クラスルーム","教室","🏫"],["blackboard","ブラックボード","黒板","⬛"],
+    ["textbook","テキストブック","教科書","📘"],["subject","サブジェクト","教科","📚"],
+    ["grade","グレイド","学年","🎓"],["classmate","クラスメイト","同級生","🧑‍🤝‍🧑"],
+    ["principal","プリンシパル","校長先生","🎩"],["junior high school","ジュニア ハイ スクール","中学校","🏢"]
+  ]},
+  { id: "body", name: "からだ", emoji: "✋", color: "var(--sunny)", words: [
+    ["head","ヘッド","頭","👤"],["eye","アイ","目","👀"],["ear","イヤー","耳","👂"],
+    ["nose","ノーズ","鼻","👃"],["mouth","マウス","口","👄"],["tooth","トゥース","歯","🦷"],
+    ["hand","ハンド","手","✋"],["finger","フィンガー","指","☝️"],["arm","アーム","うで","💪"],
+    ["leg","レッグ","足（脚）","🦵"],["foot","フット","足（足先）","🦶"],["hair","ヘア","かみの毛","💇"],
+    ["face","フェイス","顔","😀"],
+    ["shoulder","ショルダー","肩","🤷"],["neck","ネック","首","🧣"],["knee","ニー","ひざ","🧎"],["back","バック","背中","🔙"]
+  ]},
+  { id: "family", name: "かぞく・ひと", emoji: "👨‍👩‍👧‍👦", color: "var(--coral)", words: [
+    ["family","ファミリー","家族","👨‍👩‍👧‍👦"],["father","ファーザー","お父さん","👨"],["mother","マザー","お母さん","👩"],
+    ["brother","ブラザー","兄・弟","👦"],["sister","シスター","姉・妹","👧"],
+    ["grandfather","グランドファーザー","おじいさん","👴"],["grandmother","グランドマザー","おばあさん","👵"],
+    ["baby","ベイビー","赤ちゃん","👶"],["boy","ボーイ","男の子","🧒"],["girl","ガール","女の子","👧"],
+    ["man","マン","男の人","🧔"],["woman","ウーマン","女の人","👩‍🦰"],["student","ステューデント","生徒","🧑‍🎓"],
+    ["uncle","アンクル","おじさん","👨‍🦱"],["aunt","アーント","おばさん","👩‍🦱"],["cousin","カズン","いとこ","🧑‍🦰"],
+    ["parents","ペアレンツ","両親","👫"],["child","チャイルド","子ども","🧒"],["son","サン","息子","👦"],
+    ["daughter","ドーター","娘","👧"]
+  ]},
+  { id: "nature", name: "しぜん・てんき", emoji: "☀️", color: "var(--sky)", words: [
+    ["sun","サン","太陽","☀️"],["moon","ムーン","月","🌙"],["sky","スカイ","空","🌠"],
+    ["rainbow","レインボー","にじ","🌈"],["rain","レイン","雨","☔"],["snow","スノー","雪","⛄"],
+    ["cloud","クラウド","雲","☁️"],["wind","ウィンド","風","🍃"],["sea","シー","海","🌊"],
+    ["mountain","マウンテン","山","⛰️"],["river","リバー","川","🏞️"],["flower","フラワー","花","🌸"],
+    ["tree","ツリー","木","🌳"],["sunny","サニー","晴れた","🌞"],["rainy","レイニー","雨降りの","🌧️"],
+    ["cloudy","クラウディ","くもりの","🌥️"],["snowy","スノーウィ","雪の","🌨️"],
+    ["storm","ストーム","あらし","⛈️"],["thunder","サンダー","かみなり","⚡"],["typhoon","タイフーン","台風","🌀"],
+    ["ice","アイス","氷","🧊"],["forest","フォレスト","森","🌲"],["lake","レイク","湖","🛶"],
+    ["beach","ビーチ","浜辺","🏖️"],["island","アイランド","島","🏝️"],["earth","アース","地球","🌏"]
+  ]},
+  { id: "time", name: "とき・カレンダー", emoji: "📅", color: "var(--lavender)", words: [
+    ["morning","モーニング","朝","🌅"],["noon","ヌーン","昼・正午","🕛"],["evening","イブニング","夕方","🌆"],
+    ["night","ナイト","夜","🌃"],["today","トゥデイ","今日","📅"],["tomorrow","トゥモロー","明日","⏭️"],
+    ["yesterday","イエスタデイ","昨日","⏮️"],["week","ウィーク","週","🗓️"],
+    ["Sunday","サンデー","日曜日","☀️"],["Monday","マンデー","月曜日","🌙"],["Tuesday","チューズデー","火曜日","🔥"],
+    ["Wednesday","ウェンズデー","水曜日","💧"],["Thursday","サーズデー","木曜日","🌳"],["Friday","フライデー","金曜日","🪙"],
+    ["Saturday","サタデー","土曜日","🪨"],["spring","スプリング","春","🌷"],["summer","サマー","夏","⛱️"],
+    ["fall","フォール","秋","🍁"],["winter","ウィンター","冬","☃️"],["birthday","バースデー","誕生日","🎂"],
+    ["January","ジャニュアリー","1月","🎍"],["February","フェブラリー","2月","👹"],["March","マーチ","3月","🎎"],
+    ["April","エイプリル","4月","🌸"],["May","メイ","5月","🎏"],["June","ジューン","6月","☔"],
+    ["July","ジュライ","7月","🎋"],["August","オーガスト","8月","🌻"],["September","セプテンバー","9月","🌕"],
+    ["October","オクトーバー","10月","🎃"],["November","ノベンバー","11月","🍂"],["December","ディセンバー","12月","🎄"],
+    ["date","デイト","日付","📆"]
+  ]},
+  { id: "town", name: "まち・たてもの", emoji: "🏙️", color: "var(--peach)", words: [
+    ["station","ステーション","駅","🚉"],["park","パーク","公園","🛝"],["library","ライブラリー","図書館","🏛️"],
+    ["hospital","ホスピタル","病院","🏥"],["store","ストア","店","🏪"],["restaurant","レストラン","レストラン","🍝"],
+    ["supermarket","スーパーマーケット","スーパー","🛒"],["post office","ポスト オフィス","郵便局","📮"],
+    ["zoo","ズー","動物園","🦓"],["aquarium","アクアリウム","水族館","🐠"],["museum","ミュージアム","博物館","🖼️"],
+    ["movie theater","ムービー シアター","映画館","🎬"],["city","シティ","市・都会","🏙️"],["town","タウン","町","🏘️"],
+    ["bridge","ブリッジ","橋","🌉"],["road","ロード","道","🛣️"],
+    ["castle","キャッスル","城","🏰"],["shrine","シュライン","神社","⛩️"],["airport","エアポート","空港","🛫"],
+    ["hotel","ホテル","ホテル","🏨"],["bank","バンク","銀行","🏦"],["factory","ファクトリー","工場","🏭"],
+    ["building","ビルディング","建物","🏢"],["convenience store","コンビニエンス ストア","コンビニ","🍙"],
+    ["stadium","スタジアム","スタジアム","🏟️"],["bus stop","バス ストップ","バス停","🚏"],
+    ["traffic light","トラフィック ライト","信号","🚦"]
+  ]},
+  { id: "hobby", name: "スポーツ・しゅみ", emoji: "⚽", color: "var(--mint)", words: [
+    ["soccer","サッカー","サッカー","⚽"],["baseball","ベースボール","野球","⚾"],["tennis","テニス","テニス","🎾"],
+    ["basketball","バスケットボール","バスケ","🏀"],["badminton","バドミントン","バドミントン","🏸"],
+    ["table tennis","テーブル テニス","卓球","🏓"],["dodgeball","ドッジボール","ドッジボール","🤾"],
+    ["game","ゲーム","ゲーム","🎮"],["movie","ムービー","映画","🎥"],["camp","キャンプ","キャンプ","⛺"],
+    ["fishing","フィッシング","魚つり","🎣"],["art","アート","図工・アート","🎨"],["piano","ピアノ","ピアノ","🎹"],
+    ["travel","トラベル","旅行","✈️"],["shopping","ショッピング","買い物","🛍️"],
+    ["volleyball","バレーボール","バレーボール","🏐"],["rugby","ラグビー","ラグビー","🏉"],["golf","ゴルフ","ゴルフ","⛳"],
+    ["skiing","スキーイング","スキー","⛷️"],["skating","スケーティング","スケート","⛸️"],["marathon","マラソン","マラソン","🏃"],
+    ["judo","ジュードー","柔道","🥋"],["team","チーム","チーム","👥"],["player","プレイヤー","選手","🏅"],
+    ["contest","コンテスト","大会・コンテスト","🏆"]
+  ]},
+  { id: "jobs", name: "しごと", emoji: "💼", color: "var(--sunny)", words: [
+    ["doctor","ドクター","医者","🩺"],["nurse","ナース","看護師","🧑‍⚕️"],["police officer","ポリス オフィサー","警察官","👮"],
+    ["firefighter","ファイアファイター","消防士","🧑‍🚒"],["cook","クック","料理人","🧑‍🍳"],["singer","シンガー","歌手","🎙️"],
+    ["farmer","ファーマー","農家の人","🧑‍🌾"],["scientist","サイエンティスト","科学者","🧑‍🔬"],
+    ["pilot","パイロット","パイロット","🧑‍✈️"],["astronaut","アストロノート","宇宙飛行士","🧑‍🚀"],
+    ["vet","ベット","獣医","🐾"],["florist","フローリスト","花屋さん","💐"],
+    ["baker","ベイカー","パン屋さん","🥐"],["job","ジョブ","仕事","💼"],
+    ["engineer","エンジニア","技師・エンジニア","⚙️"],["programmer","プログラマー","プログラマー","💻"],
+    ["designer","デザイナー","デザイナー","🖌️"],["artist","アーティスト","芸術家","🎨"],
+    ["musician","ミュージシャン","音楽家","🎸"],["actor","アクター","俳優","🎭"],
+    ["comedian","コメディアン","お笑い芸人","🤣"],["writer","ライター","作家","🖋️"],
+    ["dentist","デンティスト","歯医者","🦷"],["carpenter","カーペンター","大工","🪚"],
+    ["driver","ドライバー","運転手","🚕"],["YouTuber","ユーチューバー","ユーチューバー","📹"]
+  ]},
+  { id: "verbs", name: "うごき", emoji: "🏃", color: "var(--sky)", words: [
+    ["run","ラン","走る","🏃"],["walk","ウォーク","歩く","🚶"],["jump","ジャンプ","とぶ","🤸"],
+    ["swim","スイム","泳ぐ","🏊"],["eat","イート","食べる","😋"],["drink","ドリンク","飲む","🥤"],
+    ["sleep","スリープ","ねる","😴"],["play","プレイ","遊ぶ・（スポーツを）する","🪁"],["sing","シング","歌う","🎤"],
+    ["dance","ダンス","おどる","💃"],["read","リード","読む","📚"],["write","ライト","書く","✍️"],
+    ["look","ルック","見る","👁️"],["listen","リッスン","聞く","🎧"],["go","ゴー","行く","➡️"],
+    ["come","カム","来る","⬅️"],["say","セイ","言う","💬"],["speak","スピーク","話す","🗣️"],
+    ["make","メイク","作る","🔨"],["get","ゲット","手に入れる","🤲"],["want","ウォント","ほしい","💫"],
+    ["know","ノウ","知っている","🧠"],["think","シンク","考える・思う","🤔"],["study","スタディ","勉強する","📖"],
+    ["help","ヘルプ","手伝う","🤝"],["use","ユーズ","使う","🔧"],["wash","ウォッシュ","洗う","🧼"],
+    ["clean","クリーン","そうじする","🧹"],["buy","バイ","買う","💰"],["meet","ミート","会う","👋"],
+    ["try","トライ","やってみる","💪"],["enjoy","エンジョイ","楽しむ","😆"],
+    ["turn","ターン","曲がる・回す","↪️"],["stop","ストップ","止まる・止める","🛑"],["open","オープン","開ける","📂"],
+    ["close","クローズ","閉める","📁"],["put","プット","置く","⬇️"],["talk","トーク","しゃべる","💬"],
+    ["call","コール","電話する・呼ぶ","📞"],["climb","クライム","登る","🧗"],["throw","スロウ","投げる","🪃"],
+    ["hit","ヒット","打つ","🏏"],["kick","キック","ける","⚽"],["push","プッシュ","押す","👉"],
+    ["pull","プル","引く","👈"],["drive","ドライブ","運転する","🚙"],["fly","フライ","飛ぶ","🦅"]
+  ]},
+  { id: "feelings", name: "きもち・ようす", emoji: "😊", color: "var(--coral)", words: [
+    ["happy","ハッピー","うれしい","😊"],["sad","サッド","悲しい","😢"],["angry","アングリー","おこっている","😠"],
+    ["hungry","ハングリー","おなかがすいた","🤤"],["sleepy","スリーピー","ねむい","🥱"],["tired","タイアード","つかれた","😮‍💨"],
+    ["excited","イクサイティッド","わくわくした","🤩"],["nervous","ナーバス","きんちょうした","😰"],
+    ["big","ビッグ","大きい","🦕"],["small","スモール","小さい","🐜"],["hot","ホット","暑い・熱い","🥵"],
+    ["cold","コールド","寒い・冷たい","🥶"],["fast","ファスト","速い","🚀"],["slow","スロー","おそい","🐢"],
+    ["good","グッド","良い・上手","👍"],["new","ニュー","新しい","✨"],["fun","ファン","楽しい","🎉"],
+    ["beautiful","ビューティフル","美しい・きれい","🌹"],["cute","キュート","かわいい","🎀"],
+    ["interesting","インタレスティング","面白い","🤓"],["difficult","ディフィカルト","難しい","😖"],
+    ["easy","イージー","簡単な","😌"],["famous","フェイマス","有名な","🌟"],
+    ["favorite","フェイバリット","お気に入りの","💝"],["delicious","デリシャス","おいしい","😍"],
+    ["kind","カインド","優しい","😇"],["strong","ストロング","強い","🦾"],["tall","トール","背が高い","🗼"],
+    ["brave","ブレイブ","勇敢な","🦁"],["shy","シャイ","はずかしがりの","😳"],["funny","ファニー","面白い・笑える","🤣"],
+    ["smart","スマート","頭がいい","🧠"],["lucky","ラッキー","運がいい","🍀"],["surprised","サプライズド","おどろいた","😲"],
+    ["scared","スケアード","こわがった","😱"],["bored","ボアード","たいくつした","😑"],["proud","プラウド","ほこらしい","🦚"],
+    ["careful","ケアフル","注意深い","⚠️"],["dangerous","デインジャラス","危険な","☠️"],["safe","セイフ","安全な","🦺"],
+    ["heavy","ヘビー","重い","🏋️"],["light","ライト","軽い","🎈"],["high","ハイ","高い","⛰️"],["low","ロー","低い","🔽"]
+  ]},
+  { id: "things", name: "みのまわり", emoji: "🏠", color: "var(--lavender)", words: [
+    ["house","ハウス","家","🏠"],["door","ドア","ドア","🚪"],["window","ウィンドウ","窓","🪟"],
+    ["bed","ベッド","ベッド","🛏️"],["chair","チェア","いす","🪑"],["TV","ティーヴィー","テレビ","📺"],
+    ["phone","フォン","電話","📱"],["computer","コンピューター","コンピューター","💻"],["camera","カメラ","カメラ","📷"],
+    ["car","カー","車","🚗"],["bus","バス","バス","🚌"],["train","トレイン","電車","🚃"],
+    ["bike","バイク","自転車","🚲"],["ball","ボール","ボール","🥎"],["toy","トイ","おもちゃ","🧸"],
+    ["umbrella","アンブレラ","かさ","☂️"],["clock","クロック","時計","⏰"],["watch","ウォッチ","うで時計","⌚"],
+    ["cap","キャップ","ぼうし","🧢"],["key","キー","かぎ","🔑"],["money","マネー","お金","💴"],
+    ["letter","レター","手紙","✉️"],
+    ["wallet","ウォレット","財布","👛"],["glasses","グラッシズ","めがね","👓"],["shoes","シューズ","くつ","👟"],
+    ["socks","ソックス","くつ下","🧦"],["clothes","クロウズ","服","👚"],["coat","コート","コート","🧥"],
+    ["gloves","グラブズ","手袋","🧤"],["towel","タウエル","タオル","🛁"],["mirror","ミラー","鏡","🪞"],
+    ["map","マップ","地図","🗺️"],["newspaper","ニューズペーパー","新聞","🗞️"],["garbage","ガービッジ","ごみ","🗑️"]
+  ]},
+  { id: "verbs2", name: "ステップアップ動詞", emoji: "⚡", color: "var(--coral)", words: [
+    ["ask","アスク","たずねる・たのむ","🙋"],["tell","テル","伝える・話す","📣"],["give","ギブ","あげる","🎁"],
+    ["take","テイク","持っていく・取る","✊"],["bring","ブリング","持ってくる","📦"],["find","ファインド","見つける","🔍"],
+    ["catch","キャッチ","つかまえる","🦋"],["carry","キャリー","運ぶ","🧳"],["begin","ビギン","始める","▶️"],
+    ["finish","フィニッシュ","終える","🏁"],["win","ウィン","勝つ","🏆"],["lose","ルーズ","負ける・なくす","😿"],
+    ["borrow","ボロー","借りる","📕"],["lend","レンド","貸す","📗"],["send","センド","送る","📤"],
+    ["receive","レシーブ","受け取る","📥"],["remember","リメンバー","覚えている","💭"],["forget","フォゲット","忘れる","🙈"],
+    ["learn","ラーン","学ぶ","🎓"],["teach","ティーチ","教える","👩‍🏫"],["practice","プラクティス","練習する","🥋"],
+    ["decide","ディサイド","決める","⚖️"],["choose","チューズ","選ぶ","☑️"],["change","チェンジ","変える","🔄"],
+    ["grow","グロウ","育つ・育てる","🌱"],["feel","フィール","感じる","💓"],["wear","ウェア","着る","👕"],
+    ["ride","ライド","乗る","🚴"],["visit","ビジット","訪ねる","🗺️"],["wait","ウェイト","待つ","⏳"],
+    ["arrive","アライブ","到着する","📍"],["understand","アンダースタンド","理解する","💡"]
+  ]},
+  { id: "adj2", name: "ステップアップことば", emoji: "🔥", color: "var(--lavender)", words: [
+    ["important","インポータント","大切な・重要な","👑"],["popular","ポピュラー","人気のある","📈"],
+    ["useful","ユースフル","役に立つ","🛠️"],["wonderful","ワンダフル","すばらしい","🌈"],
+    ["expensive","イクスペンシブ","値段が高い","💎"],["cheap","チープ","安い","🏷️"],
+    ["foreign","フォーリン","外国の","🌍"],["different","ディファレント","ちがう","🔀"],
+    ["same","セイム","同じ","👯"],["special","スペシャル","特別な","🎖️"],
+    ["quiet","クワイエット","静かな","🤫"],["busy","ビジー","いそがしい","🐝"],
+    ["free","フリー","ひまな・自由な","🕊️"],["ready","レディ","準備ができた","✅"],
+    ["sure","シュア","確かな","💯"],["wrong","ロング","まちがった","❌"],
+    ["early","アーリー","早い・早く","🐓"],["late","レイト","おそい・おくれた","⏰"],
+    ["soon","スーン","すぐに","💨"],["together","トゥギャザー","いっしょに","👫"],
+    ["usually","ユージュアリー","ふだんは","🔁"],["sometimes","サムタイムズ","時々","🎲"],
+    ["always","オールウェイズ","いつも","♾️"],["never","ネバー","一度も〜ない","🚫"],
+    ["often","オーフン","よく・ひんぱんに","📆"],["tonight","トゥナイト","今夜","🌜"]
+  ]},
+  { id: "nouns2", name: "ステップアップ名詞", emoji: "🚀", color: "var(--mint)", words: [
+    ["weekend","ウィーケンド","週末","🏖️"],["vacation","バケーション","休み・休暇","🏝️"],
+    ["holiday","ホリデー","祝日・休日","🎌"],["ticket","チケット","きっぷ","🎫"],
+    ["news","ニュース","ニュース","📰"],["message","メッセージ","伝言・メッセージ","💌"],
+    ["problem","プロブレム","問題","🧩"],["plan","プラン","計画","🗒️"],
+    ["idea","アイディア","考え・アイデア","🪄"],["language","ラングウィッジ","言語・ことば","🗨️"],
+    ["word","ワード","単語","🔠"],["country","カントリー","国","🌐"],
+    ["world","ワールド","世界","🌎"],["people","ピープル","人々","👥"],
+    ["place","プレイス","場所","📌"],["hour","アワー","1時間","🕐"],
+    ["minute","ミニット","分","⏱️"],["dream","ドリーム","夢","🦄"],
+    ["future","フューチャー","未来","🔮"],["hobby","ホビー","しゅみ","🧶"],
+    ["present","プレゼント","贈り物","🎀"],["party","パーティー","パーティー","🥳"],
+    ["festival","フェスティバル","お祭り","🏮"],["culture","カルチャー","文化","⛩️"],
+    ["uniform","ユニフォーム","制服","👔"],["dictionary","ディクショナリー","辞書","📔"],
+    ["nature","ネイチャー","自然","🌿"],["health","ヘルス","健康","🧘"],["memory","メモリー","思い出・記憶","📸"],
+    ["experience","イクスピアリエンス","経験","🎢"],["information","インフォメーション","情報","ℹ️"],
+    ["event","イベント","行事・イベント","🎪"],["prize","プライズ","賞","🎖️"],["way","ウェイ","道・方法","🛤️"],
+    ["life","ライフ","生活・命","🌱"],["environment","インバイロメント","環境","♻️"],["peace","ピース","平和","✌️"],
+    ["energy","エナジー","エネルギー","🔋"],["space","スペース","宇宙","🪐"],["robot","ロボット","ロボット","🤖"],
+    ["machine","マシーン","機械","⚙️"],["chance","チャンス","機会・チャンス","🎯"],["goal","ゴール","目標・ゴール","🥅"]
+  ]}
+];
+
+/* ================= フレーズデータ ================= */
+/* phrases: [英語, カタカナ読み, 日本語, 絵文字] */
+const PHRASE_GROUPS = [
+  { name: "あいさつ", emoji: "👋", color: "var(--coral)", phrases: [
+    ["Hello!","ハロー","こんにちは！","👋"],
+    ["Good morning.","グッド モーニング","おはよう。","🌅"],
+    ["Good night.","グッド ナイト","おやすみ。","🌙"],
+    ["Goodbye.","グッバイ","さようなら。","🚪"],
+    ["See you!","スィー ユー","またね！","🙌"],
+    ["How are you?","ハウ アー ユー？","元気？","😊"],
+    ["I'm fine, thank you.","アイム ファイン、サンキュー","元気だよ、ありがとう。","😄"],
+    ["Nice to meet you.","ナイス トゥ ミーチュー","はじめまして。","🤝"],
+    ["Long time no see!","ロング タイム ノー スィー","久しぶり！","🎉"],
+    ["Have a nice day!","ハブ ア ナイス デイ","よい一日を！","🌈"]
+  ]},
+  { name: "あいづち・リアクション", emoji: "✨", color: "var(--lavender)", phrases: [
+    ["Really?","リアリー？","本当に？","😲"],
+    ["Sounds good!","サウンズ グッド","いいね！","👍"],
+    ["Sounds fun!","サウンズ ファン","楽しそう！","🎈"],
+    ["That's great!","ザッツ グレイト","すごいね！","🌟"],
+    ["That's amazing!","ザッツ アメイジング","びっくり！すごすぎ！","🤩"],
+    ["No way!","ノー ウェイ","うそでしょ！","😱"],
+    ["I see.","アイ スィー","なるほど。","💡"],
+    ["Got it.","ガット イット","わかった。","👌"],
+    ["Me too.","ミー トゥー","私も。","🙋"],
+    ["Of course!","オブ コース","もちろん！","💪"],
+    ["Just kidding!","ジャスト キディング","じょうだんだよ！","😜"],
+    ["No problem.","ノー プロブレム","だいじょうぶ、問題ないよ。","😎"],
+    ["Never mind.","ネバー マインド","気にしないで。","🍀"],
+    ["Good luck!","グッド ラック","がんばってね！","🍀"],
+    ["Take care!","テイク ケア","気をつけてね！","👋"]
+  ]},
+  { name: "自分のことを話す", emoji: "📛", color: "var(--sky)", phrases: [
+    ["My name is Hana.","マイ ネーム イズ ハナ","私の名前ははなです。","📛"],
+    ["I'm twelve years old.","アイム トゥエルブ イヤーズ オールド","12才です。","🎂"],
+    ["I'm in the sixth grade.","アイム イン ザ シックスス グレイド","6年生です。","🏫"],
+    ["I'm from Japan.","アイム フロム ジャパン","日本から来ました。","🗾"],
+    ["I like music.","アイ ライク ミュージック","音楽が好きです。","🎵"],
+    ["My favorite subject is science.","マイ フェイバリット サブジェクト イズ サイエンス","好きな教科は理科です。","🔬"],
+    ["I'm good at swimming.","アイム グッド アット スイミング","水泳が得意です。","🏊"],
+    ["I can play the piano.","アイ キャン プレイ ザ ピアノ","ピアノがひけます。","🎹"],
+    ["I want to be a vet.","アイ ウォント トゥ ビー ア ベット","獣医になりたいです。","🐾"]
+  ]},
+  { name: "質問する", emoji: "❓", color: "var(--mint)", phrases: [
+    ["What's this?","ワッツ ディス？","これ何？","❓"],
+    ["How about you?","ハウ アバウト ユー？","あなたはどう？","🔄"],
+    ["Where are you from?","ウェア アー ユー フロム？","出身はどこ？","🌏"],
+    ["What time is it?","ワット タイム イズ イット？","今何時？","🕒"],
+    ["How's the weather?","ハウズ ザ ウェザー？","天気はどう？","🌤️"],
+    ["How was your day?","ハウ ワズ ユア デイ？","今日はどうだった？","🌆"],
+    ["What do you mean?","ワット ドゥ ユー ミーン？","どういう意味？","🤔"],
+    ["Could you say that again?","クッド ユー セイ ザット アゲイン？","もう一度言ってもらえる？","🔁"],
+    ["How do you say this in English?","ハウ ドゥ ユー セイ ディス イン イングリッシュ？","これは英語で何て言うの？","🔤"],
+    ["Can you help me?","キャン ユー ヘルプ ミー？","手伝ってくれる？","🤝"],
+    ["May I come in?","メイ アイ カム イン？","入ってもいいですか？","🚪"]
+  ]},
+  { name: "学校で", emoji: "🏫", color: "var(--sunny)", phrases: [
+    ["Let's start!","レッツ スタート","始めよう！","🚀"],
+    ["Raise your hand.","レイズ ユア ハンド","手を挙げて。","🙋"],
+    ["I have a question.","アイ ハブ ア クエスチョン","質問があります。","❓"],
+    ["I don't understand.","アイ ドント アンダースタンド","わかりません。","😵"],
+    ["I forgot my homework.","アイ フォーガット マイ ホームワーク","宿題を忘れました。","😅"],
+    ["Good job!","グッド ジョブ","よくできました！","💮"],
+    ["Here you are.","ヒア ユー アー","はい、どうぞ。","🎁"],
+    ["Thank you so much.","サンキュー ソー マッチ","本当にありがとう。","💖"],
+    ["You're welcome.","ユア ウェルカム","どういたしまして。","😊"],
+    ["I'm sorry.","アイム ソーリー","ごめんなさい。","🙏"],
+    ["That's OK.","ザッツ オーケー","だいじょうぶだよ。","👌"]
+  ]},
+  { name: "気持ちを伝える", emoji: "💗", color: "var(--coral)", phrases: [
+    ["I'm so excited!","アイム ソー イクサイティッド","すっごくわくわくする！","🤩"],
+    ["I'm nervous.","アイム ナーバス","きんちょうする。","😰"],
+    ["I'm tired.","アイム タイアード","つかれた。","😮‍💨"],
+    ["I'm hungry.","アイム ハングリー","おなかすいた。","🍙"],
+    ["That's too bad.","ザッツ トゥー バッド","それは残念だね。","😢"],
+    ["Don't worry.","ドント ウォーリー","心配しないで。","🍀"],
+    ["You can do it!","ユー キャン ドゥ イット","きみならできる！","💪"],
+    ["Cheer up!","チア アップ","元気出して！","🌞"],
+    ["What's wrong?","ワッツ ロング？","どうしたの？","🥺"],
+    ["I had a great time.","アイ ハッド ア グレイト タイム","すごく楽しかった。","🎉"]
+  ]},
+  { name: "出かける・遊ぶ", emoji: "🎈", color: "var(--sky)", phrases: [
+    ["Do you want to hang out?","ドゥ ユー ウォント トゥ ハング アウト？","遊ばない？","🎈"],
+    ["What do you want to do?","ワット ドゥ ユー ウォント トゥ ドゥ？","何がしたい？","🎯"],
+    ["How about the park?","ハウ アバウト ザ パーク？","公園はどう？","🛝"],
+    ["Sorry, I can't today.","ソーリー、アイ キャント トゥデイ","ごめん、今日は無理なんだ。","🙏"],
+    ["How about tomorrow?","ハウ アバウト トゥモロー？","明日はどう？","⏭️"],
+    ["What time shall we meet?","ワット タイム シャル ウィー ミート？","何時に待ち合わせる？","🕒"],
+    ["See you then!","スィー ユー ゼン","じゃあその時に！","👋"],
+    ["I'm on my way.","アイム オン マイ ウェイ","今向かってるよ。","🏃"],
+    ["I'm home!","アイム ホーム","ただいま！","🏠"]
+  ]},
+  { name: "会話をつなぐ（上級）", emoji: "🧩", color: "var(--peach)", phrases: [
+    ["What's up?","ワッツ アップ？","よう！最近どう？","😎"],
+    ["Guess what!","ゲス ワット","ねえ聞いて聞いて！","🎉"],
+    ["By the way, ...","バイ ザ ウェイ","ところでさ、…","🔀"],
+    ["Anyway, ...","エニウェイ","とにかく・それでね、…","➡️"],
+    ["Let me see...","レット ミー スィー","えーっと……","🤔"],
+    ["I'm not sure.","アイム ナット シュア","ちょっとわからないな。","🤷"],
+    ["What do you think?","ワット ドゥ ユー シンク？","どう思う？","💭"],
+    ["I think so too.","アイ シンク ソー トゥー","私もそう思う。","🤝"],
+    ["That makes sense.","ザット メイクス センス","なるほど、たしかに。","💡"],
+    ["Can I ask you something?","キャン アイ アスク ユー サムシング？","ちょっと聞いてもいい？","🙋"],
+    ["I can't wait!","アイ キャント ウェイト","待ちきれない！","🤩"],
+    ["It's up to you.","イッツ アップ トゥ ユー","あなたに任せるよ。","🎈"],
+    ["No worries.","ノー ウォーリーズ","気にしないで、大丈夫。","🍀"],
+    ["Take it easy.","テイク イット イージー","気楽にいこう。","😌"]
+  ]}
+];
+
+/* ================= かいわデータ ================= */
+/* lines: [話す人(a/b), 英語, カタカナ読み, 日本語] */
+const DIALOGUES = [
+  { title: "友だちに会ったら", emoji: "👋", lines: [
+    ["a","Hi! How's it going?","ハイ！ハウズ イット ゴーイング？","やあ！調子どう？"],
+    ["b","Pretty good! How about you?","プリティ グッド！ハウ アバウト ユー？","いい感じ！そっちは？"],
+    ["a","Not bad!","ナット バッド","悪くないよ！"]
+  ]},
+  { title: "週末なにしてた？", emoji: "🗓️", lines: [
+    ["a","What did you do last weekend?","ワット ディド ユー ドゥ ラスト ウィーケンド？","先週末は何してた？"],
+    ["b","I played soccer with my friends.","アイ プレイド サッカー ウィズ マイ フレンズ","友だちとサッカーしたよ。"],
+    ["a","Sounds fun!","サウンズ ファン","楽しそう！"],
+    ["b","Yeah, it was great!","イエア、イット ワズ グレイト","うん、最高だった！"]
+  ]},
+  { title: "好きな教科", emoji: "📖", lines: [
+    ["a","What's your favorite subject?","ワッツ ユア フェイバリット サブジェクト？","好きな教科は何？"],
+    ["b","I like science. How about you?","アイ ライク サイエンス。ハウ アバウト ユー？","理科が好き。あなたは？"],
+    ["a","Me too! Science is fun.","ミー トゥー！サイエンス イズ ファン","私も！理科って楽しいよね。"]
+  ]},
+  { title: "買い物で", emoji: "🛍️", lines: [
+    ["a","Can I help you?","キャン アイ ヘルプ ユー？","いらっしゃいませ、何かお探しですか？"],
+    ["b","Yes, I'm looking for a T-shirt.","イエス、アイム ルッキング フォー ア ティーシャツ","はい、Tシャツを探しています。"],
+    ["a","How about this one?","ハウ アバウト ディス ワン？","こちらはいかがですか？"],
+    ["b","I like it! I'll take it.","アイ ライク イット！アイル テイク イット","いいですね！それにします。"]
+  ]},
+  { title: "レストランで", emoji: "🍔", lines: [
+    ["a","What would you like?","ワット ウッド ユー ライク？","何になさいますか？"],
+    ["b","I'd like a hamburger and orange juice, please.","アイド ライク ア ハンバーガー アンド オレンジ ジュース、プリーズ","ハンバーガーとオレンジジュースをください。"],
+    ["a","Sure. Anything else?","シュア。エニシング エルス？","かしこまりました。ほかには？"],
+    ["b","No, that's all. Thank you.","ノー、ザッツ オール。サンキュー","いいえ、それで全部です。ありがとう。"]
+  ]},
+  { title: "道をたずねる", emoji: "🗺️", lines: [
+    ["a","Excuse me. Where is the station?","イクスキューズ ミー。ウェア イズ ザ ステーション？","すみません。駅はどこですか？"],
+    ["b","Go straight and turn left.","ゴー ストレイト アンド ターン レフト","まっすぐ行って、左に曲がってください。"],
+    ["a","Thank you so much!","サンキュー ソー マッチ","ありがとうございます！"],
+    ["b","No problem!","ノー プロブレム","どういたしまして！"]
+  ]},
+  { title: "遊びにさそう", emoji: "🎮", lines: [
+    ["a","Do you want to play games after school?","ドゥ ユー ウォント トゥ プレイ ゲームズ アフター スクール？","放課後ゲームしない？"],
+    ["b","Sorry, I can't today. How about tomorrow?","ソーリー、アイ キャント トゥデイ。ハウ アバウト トゥモロー？","ごめん、今日は無理。明日はどう？"],
+    ["a","Sure! See you then!","シュア！スィー ユー ゼン","いいよ！じゃあ明日ね！"]
+  ]},
+  { title: "待ち合わせ", emoji: "🕙", lines: [
+    ["a","What time shall we meet?","ワット タイム シャル ウィー ミート？","何時に待ち合わせる？"],
+    ["b","How about ten o'clock?","ハウ アバウト テン オクロック？","10時はどう？"],
+    ["a","Perfect! See you at the park.","パーフェクト！スィー ユー アット ザ パーク","完ぺき！公園でね。"]
+  ]},
+  { title: "うれしい知らせ", emoji: "🏆", lines: [
+    ["a","You look happy!","ユー ルック ハッピー","うれしそうだね！"],
+    ["b","I won the game!","アイ ウォン ザ ゲーム","試合に勝ったんだ！"],
+    ["a","That's amazing! Congratulations!","ザッツ アメイジング！コングラチュレーションズ","すごい！おめでとう！"],
+    ["b","Thank you!","サンキュー","ありがとう！"]
+  ]},
+  { title: "出身地の話", emoji: "🗾", lines: [
+    ["a","Where are you from?","ウェア アー ユー フロム？","出身はどこ？"],
+    ["b","I'm from Miyazaki. Have you been there?","アイム フロム ミヤザキ。ハブ ユー ビーン ゼア？","宮崎だよ。行ったことある？"],
+    ["a","No, but I want to visit!","ノー、バット アイ ウォント トゥ ビジット","ないけど、行ってみたい！"]
+  ]},
+  { title: "電話で", emoji: "📱", lines: [
+    ["a","Hello? What are you doing?","ハロー？ワット アー ユー ドゥーイング？","もしもし、今何してる？"],
+    ["b","I'm watching TV. Why?","アイム ウォッチング ティーヴィー。ワイ？","テレビ見てるよ。どうして？"],
+    ["a","Let's do our homework together.","レッツ ドゥ アワー ホームワーク トゥギャザー","いっしょに宿題やろうよ。"],
+    ["b","Good idea! I'll be there soon.","グッド アイディア！アイル ビー ゼア スーン","いいね！すぐ行くよ。"]
+  ]},
+  { title: "体調をきづかう", emoji: "🤒", lines: [
+    ["a","Are you OK? You look pale.","アー ユー オーケー？ユー ルック ペイル","だいじょうぶ？顔色が悪いよ。"],
+    ["b","I have a cold.","アイ ハブ ア コールド","かぜをひいたんだ。"],
+    ["a","That's too bad. Take care!","ザッツ トゥー バッド。テイク ケア","それは大変だね。お大事に！"],
+    ["b","Thanks. I'll go home early.","サンクス。アイル ゴー ホーム アーリー","ありがとう。早めに帰るよ。"]
+  ]},
+  { title: "将来の夢", emoji: "🔮", lines: [
+    ["a","What do you want to be in the future?","ワット ドゥ ユー ウォント トゥ ビー イン ザ フューチャー？","将来何になりたい？"],
+    ["b","I want to be a game designer. How about you?","アイ ウォント トゥ ビー ア ゲーム デザイナー。ハウ アバウト ユー？","ゲームデザイナーになりたいな。あなたは？"],
+    ["a","I want to be a nurse.","アイ ウォント トゥ ビー ア ナース","看護師になりたいんだ。"],
+    ["b","Cool! You can do it!","クール！ユー キャン ドゥ イット","いいね！きっとなれるよ！"]
+  ]},
+  { title: "誕生日パーティー", emoji: "🎂", lines: [
+    ["a","Happy birthday! This is for you.","ハッピー バースデー！ディス イズ フォー ユー","誕生日おめでとう！これ、プレゼント。"],
+    ["b","Wow, thank you! Can I open it?","ワオ、サンキュー！キャン アイ オープン イット？","わあ、ありがとう！開けてもいい？"],
+    ["a","Of course!","オブ コース","もちろん！"],
+    ["b","I love it! Thank you so much!","アイ ラブ イット！サンキュー ソー マッチ","すごく気に入った！本当にありがとう！"]
+  ]},
+  { title: "写真を見せる", emoji: "📷", lines: [
+    ["a","Look at this photo.","ルック アット ディス フォト","この写真見て。"],
+    ["b","Wow! Where did you take it?","ワオ！ウェア ディド ユー テイク イット？","わあ！どこで撮ったの？"],
+    ["a","At the beach in Okinawa.","アット ザ ビーチ イン オキナワ","沖縄のビーチだよ。"],
+    ["b","Beautiful! I want to go there!","ビューティフル！アイ ウォント トゥ ゴー ゼア","きれい！行ってみたい！"]
+  ]},
+  { title: "週末の予定", emoji: "🏖️", lines: [
+    ["a","What are you going to do this weekend?","ワット アー ユー ゴーイング トゥ ドゥ ディス ウィーケンド？","今週末は何するの？"],
+    ["b","I'm going to visit my grandma.","アイム ゴーイング トゥ ビジット マイ グランマ","おばあちゃんの家に行くんだ。"],
+    ["a","Nice! Have fun!","ナイス！ハブ ファン","いいね！楽しんできて！"],
+    ["b","Thanks! See you on Monday.","サンクス！スィー ユー オン マンデー","ありがとう！月曜日にね。"]
+  ]},
+  { title: "外国から来た子と", emoji: "🌏", lines: [
+    ["a","Where are you from?","ウェア アー ユー フロム？","どこから来たの？"],
+    ["b","I'm from Australia.","アイム フロム オーストラリア","オーストラリアだよ。"],
+    ["a","How do you like Japan?","ハウ ドゥ ユー ライク ジャパン？","日本はどう？"],
+    ["b","I love it! The food is delicious.","アイ ラブ イット！ザ フード イズ デリシャス","大好き！ご飯がおいしいね。"]
+  ]},
+  { title: "雨の日の作戦会議", emoji: "☔", lines: [
+    ["a","Oh no, it's raining.","オー ノー、イッツ レイニング","あーあ、雨降ってきた。"],
+    ["b","Let's play games inside.","レッツ プレイ ゲームズ インサイド","家の中でゲームしようよ。"],
+    ["a","Good idea! Let's go to your house.","グッド アイディア！レッツ ゴー トゥ ユア ハウス","いいね！きみの家に行こう。"],
+    ["b","OK! Follow me!","オーケー！フォロー ミー","オッケー！ついてきて！"]
+  ]}
+];
+
+/* ================= 音声 ================= */
+let enVoice = null;
+function pickVoice() {
+  if (!("speechSynthesis" in window)) return;
+  const voices = speechSynthesis.getVoices();
+  if (!voices.length) return;
+  enVoice =
+    voices.find(v => v.lang === "en-US" && /Samantha|Google US English/i.test(v.name)) ||
+    voices.find(v => v.lang === "en-US") ||
+    voices.find(v => v.lang && v.lang.startsWith("en")) ||
+    null;
+}
+if ("speechSynthesis" in window) {
+  pickVoice();
+  speechSynthesis.onvoiceschanged = pickVoice;
+}
+function makeUtterance(text, pitch) {
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-US";
+  u.rate = 0.85;
+  u.pitch = pitch || 1;
+  if (enVoice) u.voice = enVoice;
+  return u;
+}
+function speak(text, pitch) {
+  if (!("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(makeUtterance(text, pitch));
+}
+/* かいわ: A=ふつうの高さ / B=低めの声 で聞き分けられるように */
+const PITCH_A = 1.1;
+const PITCH_B = 0.8;
+function speakDialogue(lines) {
+  if (!("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  lines.forEach(line => {
+    speechSynthesis.speak(makeUtterance(line[1], line[0] === "a" ? PITCH_A : PITCH_B));
+  });
+}
+
+/* 効果音（正解・まちがい） */
+let audioCtx = null;
+function tone(freq, start, dur, type) {
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type || "sine";
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(0.14, audioCtx.currentTime + start);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + start + dur);
+  o.connect(g).connect(audioCtx.destination);
+  o.start(audioCtx.currentTime + start);
+  o.stop(audioCtx.currentTime + start + dur);
+}
+function playCorrect() {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    tone(880, 0, 0.15); tone(1320, 0.13, 0.25);
+  } catch (e) {}
+}
+function playWrong() {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    tone(220, 0, 0.3, "square");
+  } catch (e) {}
+}
+
+/* ================= 保存（おぼえたスター） ================= */
+const LS_KEY = "eigonomori_learned";
+let learned = new Set();
+try { learned = new Set(JSON.parse(localStorage.getItem(LS_KEY) || "[]")); } catch (e) {}
+function saveLearned() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify([...learned])); } catch (e) {}
+}
+function wordKey(catId, en) { return catId + ":" + en; }
+function updateStarCount() {
+  document.getElementById("starCount").textContent = learned.size;
+}
+
+/* ================= 学習記録 ================= */
+const WORD_KEY_MAP = new Map();
+const KEY_WORD_MAP = new Map();
+CATS.forEach(c => c.words.forEach(w => {
+  const k = c.id + ":" + w[0];
+  WORD_KEY_MAP.set(w, k);
+  KEY_WORD_MAP.set(k, w);
+}));
+
+const LOG_KEY = "eigonomori_log";
+let studyLog = {};
+try { studyLog = JSON.parse(localStorage.getItem(LOG_KEY) || "{}") || {}; } catch (e) {}
+function dateStr(d) {
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function todayLog() {
+  const t = dateStr(new Date());
+  if (!studyLog[t]) studyLog[t] = { seen: [], star: [], wrong: [], qc: 0, qt: 0 };
+  return studyLog[t];
+}
+function saveLog() {
+  const keys = Object.keys(studyLog).sort();
+  while (keys.length > 30) delete studyLog[keys.shift()];
+  try { localStorage.setItem(LOG_KEY, JSON.stringify(studyLog)); } catch (e) {}
+}
+function logSeen(key) { const l = todayLog(); if (l.seen.indexOf(key) === -1) l.seen.push(key); saveLog(); }
+function logStar(key) { const l = todayLog(); if (l.star.indexOf(key) === -1) l.star.push(key); saveLog(); }
+function logQuiz(key, ok) {
+  const l = todayLog();
+  l.qt++;
+  if (ok) l.qc++;
+  else if (key && l.wrong.indexOf(key) === -1) l.wrong.push(key);
+  saveLog();
+}
+function reviewKeys() {
+  const l = todayLog();
+  const keys = [];
+  l.wrong.concat(l.star, l.seen).forEach(k => { if (keys.indexOf(k) === -1 && KEY_WORD_MAP.has(k)) keys.push(k); });
+  return keys;
+}
+function streakDays() {
+  let n = 0;
+  const d = new Date();
+  const active = k => { const e = studyLog[k]; return e && (e.seen.length || e.star.length || e.qt); };
+  if (!active(dateStr(d))) d.setDate(d.getDate() - 1); /* 今日まだ0でも連続は切らない */
+  while (active(dateStr(d))) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function renderLog() {
+  const l = todayLog();
+  document.getElementById("logToday").innerHTML =
+    '<div class="log-card"><div class="log-stats">' +
+    '<div class="log-stat"><div class="num">' + l.seen.length + '</div><div class="lbl">今日見た単語</div></div>' +
+    '<div class="log-stat"><div class="num">' + l.star.length + '</div><div class="lbl">今日覚えた⭐</div></div>' +
+    '<div class="log-stat"><div class="num">' + (l.qt ? l.qc + "/" + l.qt : "－") + '</div><div class="lbl">クイズ正解</div></div>' +
+    '</div><div class="log-streak">🔥 ' + streakDays() + '日 連続学習中！</div></div>';
+  const btn = document.getElementById("reviewBtn");
+  const n = reviewKeys().length;
+  btn.disabled = !n;
+  btn.textContent = n ? "📝 今日の振り返りクイズ（" + Math.min(n, 10) + "問）" : "📝 今日はまだ学習してないよ";
+  const hist = document.getElementById("logHistory");
+  hist.innerHTML = "";
+  const days = Object.keys(studyLog).sort().reverse().slice(0, 14);
+  if (!days.length) hist.innerHTML = '<p class="dict-msg">記録はこれからたまっていくよ！</p>';
+  days.forEach(d => {
+    const e = studyLog[d];
+    const row = document.createElement("div");
+    row.className = "log-row";
+    const left = document.createElement("span");
+    left.className = "d";
+    left.textContent = d.slice(5).replace("-", "/");
+    const right = document.createElement("span");
+    right.textContent = "単語 " + e.seen.length + "・⭐" + e.star.length + "・クイズ " + (e.qt ? e.qc + "/" + e.qt : "－");
+    row.appendChild(left);
+    row.appendChild(right);
+    hist.appendChild(row);
+  });
+}
+document.getElementById("starBtn").addEventListener("click", () => {
+  renderLog();
+  show("screen-log");
+});
+document.getElementById("logBack").addEventListener("click", () => {
+  renderCatGrid();
+  show("screen-cats");
+});
+document.getElementById("reviewBtn").addEventListener("click", () => startReviewQuiz());
+
+/* ---- バックアップ・ひっこしコード ---- */
+function exportCode() {
+  const data = { v: 1, learned: [...learned], log: studyLog };
+  return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+}
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const ta = document.getElementById("portArea");
+  ta.style.display = "block";
+  ta.readOnly = true;
+  ta.value = exportCode();
+  document.getElementById("importGo").style.display = "none";
+  ta.focus();
+  ta.select();
+  const msg = document.getElementById("portMsg");
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(ta.value)
+      .then(() => { msg.textContent = "コピーしたよ！LINEのキープなどに貼っておいてね 📋"; })
+      .catch(() => { msg.textContent = "コードを長押し→「すべてを選択」→コピーしてね"; });
+  } else {
+    msg.textContent = "コードを長押し→「すべてを選択」→コピーしてね";
+  }
+});
+document.getElementById("importBtn").addEventListener("click", () => {
+  const ta = document.getElementById("portArea");
+  ta.style.display = "block";
+  ta.readOnly = false;
+  ta.value = "";
+  ta.placeholder = "ここにコードを貼ってね";
+  document.getElementById("importGo").style.display = "inline-block";
+  document.getElementById("portMsg").textContent = "";
+  ta.focus();
+});
+document.getElementById("importGo").addEventListener("click", () => {
+  const msg = document.getElementById("portMsg");
+  try {
+    const data = JSON.parse(decodeURIComponent(escape(atob(document.getElementById("portArea").value.trim()))));
+    if (!data || data.v !== 1) throw new Error("bad");
+    (data.learned || []).forEach(k => learned.add(k));
+    Object.keys(data.log || {}).forEach(d => {
+      const b = data.log[d];
+      const a = studyLog[d];
+      if (!a) { studyLog[d] = b; return; }
+      ["seen", "star", "wrong"].forEach(f => (b[f] || []).forEach(k => { if (a[f].indexOf(k) === -1) a[f].push(k); }));
+      a.qc = Math.max(a.qc, b.qc || 0);
+      a.qt = Math.max(a.qt, b.qt || 0);
+    });
+    saveLearned();
+    saveLog();
+    updateStarCount();
+    renderLog();
+    document.getElementById("portArea").style.display = "none";
+    document.getElementById("importGo").style.display = "none";
+    msg.textContent = "おかえり！記録をもどしたよ 🎉";
+  } catch (e) {
+    msg.textContent = "コードが読めなかった…コピーしなおしてみてね";
+  }
+});
+
+/* ================= 画面切り替え ================= */
+const screens = ["screen-cats","screen-cards","screen-quiz-pick","screen-quiz","screen-quiz-result","screen-phrases","screen-dialogues","screen-dict","screen-log"];
+function show(id) {
+  screens.forEach(s => document.getElementById(s).classList.toggle("show", s === id));
+  window.scrollTo(0, 0);
+}
+const navButtons = {
+  "nav-words": "screen-cats",
+  "nav-quiz": "screen-quiz-pick",
+  "nav-phrases": "screen-phrases",
+  "nav-dialogues": "screen-dialogues",
+  "nav-dict": "screen-dict"
+};
+Object.keys(navButtons).forEach(nid => {
+  document.getElementById(nid).addEventListener("click", () => {
+    Object.keys(navButtons).forEach(n => document.getElementById(n).classList.toggle("active", n === nid));
+    if (nid === "nav-words") renderCatGrid();
+    if (nid === "nav-quiz") renderQuizCatGrid();
+    if ("speechSynthesis" in window) speechSynthesis.cancel();
+    show(navButtons[nid]);
+  });
+});
+
+/* ================= たんご ================= */
+function renderCatGrid() {
+  const grid = document.getElementById("catGrid");
+  grid.innerHTML = "";
+  CATS.forEach(cat => {
+    const done = cat.words.filter(w => learned.has(wordKey(cat.id, w[0]))).length;
+    const btn = document.createElement("button");
+    btn.className = "cat-card";
+    btn.style.background = cat.color;
+    btn.innerHTML =
+      '<span class="cat-emoji">' + cat.emoji + '</span>' +
+      '<span class="cat-name">' + cat.name + '</span>' +
+      '<span class="cat-progress">⭐ ' + done + " / " + cat.words.length + '</span>';
+    btn.addEventListener("click", () => openCards(cat));
+    grid.appendChild(btn);
+  });
+}
+
+let curCat = null;
+let curIdx = 0;
+const flipCard = document.getElementById("flipCard");
+
+function openCards(cat) {
+  curCat = cat;
+  curIdx = 0;
+  document.getElementById("cardsTitle").textContent = cat.emoji + " " + cat.name;
+  renderWord(false);
+  show("screen-cards");
+}
+function renderWord(speakIt) {
+  const w = curCat.words[curIdx];
+  flipCard.classList.remove("flipped");
+  document.getElementById("cardEmoji").textContent = w[3];
+  document.getElementById("cardEn").textContent = w[0];
+  document.getElementById("cardKana").textContent = w[1];
+  document.getElementById("cardEmojiB").textContent = w[3];
+  document.getElementById("cardJa").textContent = w[2];
+  const isLearned = learned.has(wordKey(curCat.id, w[0]));
+  logSeen(wordKey(curCat.id, w[0]));
+  document.getElementById("learnedMark").textContent = isLearned ? "⭐" : "";
+  const lb = document.getElementById("learnedBtn");
+  lb.classList.toggle("on", isLearned);
+  lb.textContent = isLearned ? "⭐ 覚えたよ！" : "⭐ 覚えた！";
+  document.getElementById("wordCounter").textContent = (curIdx + 1) + " / " + curCat.words.length;
+  if (speakIt) speak(w[0]);
+}
+flipCard.addEventListener("click", () => flipCard.classList.toggle("flipped"));
+flipCard.addEventListener("keydown", e => {
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flipCard.classList.toggle("flipped"); }
+});
+document.getElementById("speakWord").addEventListener("click", e => {
+  e.stopPropagation();
+  speak(curCat.words[curIdx][0]);
+});
+document.getElementById("prevWord").addEventListener("click", () => {
+  curIdx = (curIdx - 1 + curCat.words.length) % curCat.words.length;
+  renderWord(true);
+});
+document.getElementById("nextWord").addEventListener("click", () => {
+  curIdx = (curIdx + 1) % curCat.words.length;
+  renderWord(true);
+});
+document.getElementById("learnedBtn").addEventListener("click", () => {
+  const key = wordKey(curCat.id, curCat.words[curIdx][0]);
+  if (learned.has(key)) learned.delete(key); else { learned.add(key); logStar(key); playCorrect(); }
+  saveLearned();
+  updateStarCount();
+  renderWord(false);
+});
+document.getElementById("cardsBack").addEventListener("click", () => {
+  renderCatGrid();
+  show("screen-cats");
+});
+
+/* ================= クイズ ================= */
+const QUIZ_LEN = 10;
+let quiz = null;
+let quizMode = "normal"; /* normal | listen */
+
+document.getElementById("modeNormal").addEventListener("click", () => setQuizMode("normal"));
+document.getElementById("modeListen").addEventListener("click", () => setQuizMode("listen"));
+function setQuizMode(m) {
+  quizMode = m;
+  document.getElementById("modeNormal").classList.toggle("active", m === "normal");
+  document.getElementById("modeListen").classList.toggle("active", m === "listen");
+}
+
+function renderQuizCatGrid() {
+  const grid = document.getElementById("quizCatGrid");
+  grid.innerHTML = "";
+  const all = document.createElement("button");
+  all.className = "cat-card";
+  all.style.background = "var(--ink)";
+  all.innerHTML = '<span class="cat-emoji">🌟</span><span class="cat-name">全部ミックス</span><span class="cat-progress">難しい！</span>';
+  all.addEventListener("click", () => startQuiz(null));
+  grid.appendChild(all);
+  CATS.forEach(cat => {
+    const btn = document.createElement("button");
+    btn.className = "cat-card";
+    btn.style.background = cat.color;
+    btn.innerHTML = '<span class="cat-emoji">' + cat.emoji + '</span><span class="cat-name">' + cat.name + '</span>';
+    btn.addEventListener("click", () => startQuiz(cat));
+    grid.appendChild(btn);
+  });
+}
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function buildQuestions(ordered, dPoolBase) {
+  /* 出題プールが小さいときは、まちがい選択肢を全単語から借りる */
+  const dPool = dPoolBase.length >= 8 ? dPoolBase : CATS.flatMap(c => c.words);
+  return ordered.slice(0, QUIZ_LEN).map(w => {
+    const wrongs = shuffle(dPool.filter(x => x !== w && x[2] !== w[2])).slice(0, 3);
+    return { w, choices: shuffle([w, ...wrongs]) };
+  });
+}
+function startQuiz(cat) {
+  const pool = cat ? cat.words : CATS.flatMap(c => c.words);
+  quiz = { questions: buildQuestions(shuffle(pool), pool), i: 0, results: [], listen: quizMode === "listen" };
+  renderQuizQ();
+  show("screen-quiz");
+}
+/* 今日の振り返り: まちがえた単語を先頭に、見た・おぼえた単語から出題 */
+function startReviewQuiz() {
+  const l = todayLog();
+  const wrongW = shuffle(l.wrong.map(k => KEY_WORD_MAP.get(k)).filter(Boolean));
+  const restKeys = reviewKeys().filter(k => l.wrong.indexOf(k) === -1);
+  const restW = shuffle(restKeys.map(k => KEY_WORD_MAP.get(k)).filter(Boolean));
+  const ordered = wrongW.concat(restW);
+  if (!ordered.length) return;
+  quiz = { questions: buildQuestions(ordered, ordered), i: 0, results: [], listen: false };
+  renderQuizQ();
+  show("screen-quiz");
+}
+function renderQuizQ() {
+  const q = quiz.questions[quiz.i];
+  const prog = document.getElementById("quizProgress");
+  prog.innerHTML = "";
+  quiz.questions.forEach((_, i) => {
+    const dot = document.createElement("span");
+    if (i < quiz.results.length) dot.className = quiz.results[i] ? "hit" : "miss";
+    else if (i === quiz.i) dot.className = "now";
+    prog.appendChild(dot);
+  });
+  document.getElementById("quizEmoji").textContent = quiz.listen ? "🎧" : "❓";
+  document.getElementById("quizEn").textContent = quiz.listen ? "？？？" : q.w[0];
+  document.getElementById("quizFeedback").textContent = "";
+  document.getElementById("quizNext").style.display = "none";
+  const box = document.getElementById("quizChoices");
+  box.innerHTML = "";
+  q.choices.forEach(c => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    btn.textContent = c[2];
+    btn.addEventListener("click", () => answer(btn, c, q));
+    box.appendChild(btn);
+  });
+  speak(q.w[0]);
+}
+function answer(btn, c, q) {
+  const buttons = document.querySelectorAll("#quizChoices .choice-btn");
+  buttons.forEach(b => (b.disabled = true));
+  const ok = c[2] === q.w[2];
+  quiz.results.push(ok);
+  logQuiz(WORD_KEY_MAP.get(q.w), ok);
+  document.getElementById("quizEmoji").textContent = q.w[3];
+  document.getElementById("quizEn").textContent = q.w[0]; /* 聞き取りモードでも答え合わせで表示 */
+  const fb = document.getElementById("quizFeedback");
+  if (ok) {
+    btn.classList.add("correct");
+    fb.textContent = "正解！🎉";
+    fb.style.color = "var(--mint)";
+    playCorrect();
+  } else {
+    btn.classList.add("wrong");
+    buttons.forEach(b => { if (b.textContent === q.w[2]) b.classList.add("correct"); });
+    fb.textContent = "残念…答えは「" + q.w[2] + "」";
+    fb.style.color = "var(--coral)";
+    playWrong();
+  }
+  document.getElementById("quizNext").style.display = "inline-block";
+}
+document.getElementById("quizNext").addEventListener("click", () => {
+  quiz.i++;
+  if (quiz.i >= quiz.questions.length) showResult();
+  else renderQuizQ();
+});
+function showResult() {
+  const score = quiz.results.filter(Boolean).length;
+  const total = quiz.questions.length;
+  document.getElementById("resultScore").textContent = score + " / " + total + " 問正解！";
+  let emoji, msg;
+  if (score === total) { emoji = "🏆"; msg = "パーフェクト！すごい！！"; }
+  else if (score >= total * 0.7) { emoji = "🎉"; msg = "とってもいい調子！"; }
+  else if (score >= total * 0.4) { emoji = "😊"; msg = "あと少し！もう一度やってみよう！"; }
+  else { emoji = "💪"; msg = "単語カードで練習してみよう！"; }
+  document.getElementById("resultEmoji").textContent = emoji;
+  document.getElementById("resultMsg").textContent = msg;
+  show("screen-quiz-result");
+}
+document.getElementById("quizSpeak").addEventListener("click", () => {
+  if (quiz) speak(quiz.questions[quiz.i].w[0]);
+});
+document.getElementById("quizBack").addEventListener("click", () => {
+  renderQuizCatGrid();
+  show("screen-quiz-pick");
+});
+document.getElementById("resultRetry").addEventListener("click", () => {
+  renderQuizCatGrid();
+  show("screen-quiz-pick");
+});
+
+/* ================= フレーズ ================= */
+function renderPhrases() {
+  const area = document.getElementById("phraseArea");
+  area.innerHTML = "";
+  PHRASE_GROUPS.forEach(g => {
+    const title = document.createElement("div");
+    title.className = "phrase-group-title";
+    title.innerHTML = '<span class="chip" style="background:' + g.color + '">' + g.emoji + " " + g.name + "</span>";
+    area.appendChild(title);
+    const list = document.createElement("div");
+    list.className = "phrase-list";
+    g.phrases.forEach(p => {
+      const row = document.createElement("div");
+      row.className = "phrase-row";
+      row.innerHTML =
+        '<span class="p-emoji">' + p[3] + '</span>' +
+        '<span class="p-text"><span class="p-en">' + p[0] + '</span>' +
+        '<span class="p-kana">' + p[1] + '</span>' +
+        '<span class="p-ja">' + p[2] + '</span></span>';
+      const btn = document.createElement("button");
+      btn.className = "p-speak";
+      btn.setAttribute("aria-label", "発音を聞く");
+      btn.textContent = "🔊";
+      btn.addEventListener("click", () => speak(p[0]));
+      row.appendChild(btn);
+      list.appendChild(row);
+    });
+    area.appendChild(list);
+  });
+}
+
+/* ================= かいわ ================= */
+function renderDialogues() {
+  const area = document.getElementById("dialogueArea");
+  area.innerHTML = "";
+  DIALOGUES.forEach(d => {
+    const card = document.createElement("div");
+    card.className = "dlg-card";
+
+    const head = document.createElement("div");
+    head.className = "dlg-head";
+    head.innerHTML = '<span class="dlg-emoji">' + d.emoji + '</span><span class="dlg-title">' + d.title + '</span>';
+    const playAll = document.createElement("button");
+    playAll.className = "dlg-play-all";
+    playAll.textContent = "▶ 通して聞く";
+    playAll.addEventListener("click", () => speakDialogue(d.lines));
+    head.appendChild(playAll);
+    card.appendChild(head);
+
+    const lines = document.createElement("div");
+    lines.className = "dlg-lines";
+    d.lines.forEach(line => {
+      const row = document.createElement("div");
+      row.className = "dlg-line " + line[0];
+      const who = document.createElement("span");
+      who.className = "dlg-who";
+      who.textContent = line[0] === "a" ? "🧑" : "🐥";
+      const bubble = document.createElement("div");
+      bubble.className = "dlg-bubble";
+      bubble.setAttribute("role", "button");
+      bubble.setAttribute("tabindex", "0");
+      bubble.innerHTML =
+        '<span class="dlg-en">' + line[1] + '</span>' +
+        '<span class="dlg-kana">' + line[2] + '</span>' +
+        '<span class="dlg-ja">' + line[3] + '</span>';
+      const sayIt = () => speak(line[1], line[0] === "a" ? PITCH_A : PITCH_B);
+      bubble.addEventListener("click", sayIt);
+      bubble.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); sayIt(); }
+      });
+      row.appendChild(who);
+      row.appendChild(bubble);
+      lines.appendChild(row);
+    });
+    card.appendChild(lines);
+    area.appendChild(card);
+  });
+}
+
+/* ================= 辞書 ================= */
+/* 日本のことば補助辞書: [英語, 日本語, よみ] — 本体辞書(英和)に無い日本文化のことばを補う */
+const JP_WORDS = [
+  /* 家・くらし */
+  ["wind chime","風鈴","ふうりん"],["paper sliding door","障子","しょうじ"],["sliding door","ふすま","ふすま"],
+  ["tatami mat","畳","たたみ"],["futon","布団","ふとん"],["kotatsu","こたつ（あたたかいテーブル）","こたつ"],
+  ["floor cushion","座布団","ざぶとん"],["folding fan","扇子","せんす"],["paper fan","うちわ","うちわ"],
+  ["wrapping cloth","風呂敷","ふろしき"],["entrance hall","玄関","げんかん"],["bath","お風呂","おふろ"],
+  ["veranda","縁側","えんがわ"],["paper lantern","提灯","ちょうちん"],["shop curtain","のれん","のれん"],
+  ["personal seal","はんこ","はんこ"],["hand towel","手ぬぐい","てぬぐい"],["teacup","湯のみ","ゆのみ"],
+  ["teapot","急須","きゅうす"],["mosquito coil","蚊取り線香","かとりせんこう"],
+  /* たべもの */
+  ["rice ball","おにぎり","おにぎり"],["rice cake","お餅","おもち"],["miso soup","みそ汁","みそしる"],
+  ["pickles","漬物","つけもの"],["tempura","天ぷら","てんぷら"],["sushi","寿司","すし"],
+  ["sashimi","刺身（なまの魚）","さしみ"],["udon noodles","うどん","うどん"],["soba noodles","そば","そば"],
+  ["ramen","ラーメン","らーめん"],["lunch box","お弁当","おべんとう"],["matcha","抹茶","まっちゃ"],
+  ["Japanese sweets","和菓子","わがし"],["rice cracker","せんべい","せんべい"],["takoyaki","たこ焼き（タコ入りのボール）","たこやき"],
+  ["okonomiyaki","お好み焼き","おこのみやき"],["fried noodles","焼きそば","やきそば"],["rice bowl dish","丼","どんぶり"],
+  ["hot pot","鍋料理","なべりょうり"],["rolled omelet","卵焼き","たまごやき"],["barley tea","麦茶","むぎちゃ"],
+  ["seaweed","のり・海藻","のり"],
+  /* 行事・学校 */
+  ["New Year's","お正月","おしょうがつ"],["New Year's shrine visit","初詣","はつもうで"],
+  ["bean-throwing festival","節分","せつぶん"],["Doll Festival","ひな祭り","ひなまつり"],
+  ["cherry blossom viewing","花見","はなみ"],["Children's Day","こどもの日","こどものひ"],
+  ["Star Festival","七夕","たなばた"],["summer festival","夏祭り","なつまつり"],
+  ["Bon festival","お盆","おぼん"],["Bon dance","盆踊り","ぼんおどり"],
+  ["fireworks festival","花火大会","はなびたいかい"],["moon viewing","月見","つきみ"],
+  ["Shichi-Go-San","七五三","しちごさん"],["New Year's Eve","大晦日","おおみそか"],
+  ["New Year's card","年賀状","ねんがじょう"],["New Year's gift money","お年玉","おとしだま"],
+  ["sports day","運動会","うんどうかい"],["field trip","遠足","えんそく"],
+  ["school trip","修学旅行","しゅうがくりょこう"],["entrance ceremony","入学式","にゅうがくしき"],
+  ["graduation ceremony","卒業式","そつぎょうしき"],["school festival","文化祭","ぶんかさい"],
+  ["school lunch","給食","きゅうしょく"],["club activities","部活動","ぶかつどう"],
+  ["cram school","塾","じゅく"],["cleaning time","掃除の時間","そうじのじかん"],
+  /* でんとう・あそび */
+  ["origami","折り紙","おりがみ"],["picture-story show","紙芝居","かみしばい"],["kendama","けん玉","けんだま"],
+  ["spinning top","こま","こま"],["kite flying","凧あげ","たこあげ"],["karuta","かるた（日本のカードゲーム）","かるた"],
+  ["shogi","将棋（日本のチェス）","しょうぎ"],["go","囲碁","いご"],["rock-paper-scissors","じゃんけん","じゃんけん"],
+  ["tag","鬼ごっこ","おにごっこ"],["hide-and-seek","かくれんぼ","かくれんぼ"],["jump rope","なわとび","なわとび"],
+  ["radio exercises","ラジオ体操","らじおたいそう"],["bonsai","盆栽","ぼんさい"],["calligraphy","書道","しょどう"],
+  ["tea ceremony","茶道","さどう"],["flower arrangement","生け花","いけばな"],["haiku","俳句（日本の短い詩）","はいく"],
+  ["Japanese drum","和太鼓","わだいこ"],["shamisen","三味線","しゃみせん"],["koto","琴（日本のハープ）","こと"],
+  ["rakugo","落語（おもしろい話の芸）","らくご"],["kabuki","歌舞伎（日本の劇）","かぶき"],
+  ["sumo wrestling","相撲","すもう"],["kendo","剣道","けんどう"],["Japanese archery","弓道","きゅうどう"],
+  ["karate","空手","からて"],["ninja","忍者","にんじゃ"],["samurai","侍","さむらい"],["Japanese sword","刀","かたな"],
+  /* きるもの */
+  ["kimono","着物","きもの"],["yukata","浴衣（夏の着物）","ゆかた"],["sash","帯","おび"],
+  ["wooden clogs","下駄","げた"],["Japanese sandals","草履","ぞうり"],["headband","はちまき","はちまき"],
+  ["school backpack","ランドセル","らんどせる"],
+  /* ばしょ・しぜん */
+  ["shrine","神社","じんじゃ"],["temple","お寺","おてら"],["torii gate","鳥居","とりい"],
+  ["hot spring","温泉","おんせん"],["public bath","銭湯","せんとう"],["Mt. Fuji","富士山","ふじさん"],
+  ["cherry blossoms","桜","さくら"],["autumn leaves","紅葉","こうよう"],["plum","梅","うめ"],
+  ["bamboo","竹","たけ"],["pine tree","松","まつ"],["rice field","田んぼ","たんぼ"],
+  ["rice plant","稲","いね"],["carp","鯉","こい"],["crane","鶴","つる"],["goldfish","金魚","きんぎょ"],
+  ["cicada","蝉","せみ"],["beetle","カブトムシ","かぶとむし"],["firefly","ホタル","ほたる"],
+  ["police box","交番","こうばん"],
+  /* ことば・その他 */
+  ["bow","お辞儀","おじぎ"],["Let's eat!","いただきます（食べる前のあいさつ）","いただきます"],
+  ["Thank you for the meal.","ごちそうさま（食べた後のあいさつ）","ごちそうさま"],
+  ["souvenir","お土産","おみやげ"],["hospitality","おもてなし","おもてなし"],
+  ["wasteful","もったいない","もったいない"],["Do your best!","頑張って","がんばって"],
+  ["older student","先輩","せんぱい"],["younger student","後輩","こうはい"],
+  ["bullet train","新幹線","しんかんせん"],["vending machine","自動販売機","じどうはんばいき"],
+  ["god","神様","かみさま"],["Emperor","天皇","てんのう"]
+];
+const JP_LINE_SET = new Set();
+
+/* 本体辞書(4.4MB)は別ファイル。初回に取得し、以後はService Workerのキャッシュから読む */
+let dictLines = JP_WORDS.map(w => {
+  const line = w[0] + "\t『" + w[1] + "』" + (w[2] && w[2] !== w[1] ? "," + w[2] : "");
+  JP_LINE_SET.add(line);
+  return line;
+});
+let dictBaseLoaded = false;
+fetch("dict.txt?v=1")
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+  .then(t => {
+    dictLines = dictLines.concat(t.split("\n").filter(Boolean));
+    dictBaseLoaded = true;
+  })
+  .catch(() => {});
+function loadDict() { return dictLines; }
+/* 変化形を推測して原形でも引く: dogs→dog, running→run など */
+function enForms(lq) {
+  const forms = [lq];
+  if (lq.endsWith("ies") && lq.length > 4) forms.push(lq.slice(0, -3) + "y");
+  if (lq.endsWith("es") && lq.length > 3) forms.push(lq.slice(0, -2));
+  if (lq.endsWith("s") && lq.length > 2) forms.push(lq.slice(0, -1));
+  if (lq.endsWith("ing") && lq.length > 5) { forms.push(lq.slice(0, -3)); forms.push(lq.slice(0, -3) + "e"); }
+  if (lq.endsWith("ed") && lq.length > 4) { forms.push(lq.slice(0, -2)); forms.push(lq.slice(0, -1)); }
+  if (lq.endsWith("ied") && lq.length > 4) forms.push(lq.slice(0, -3) + "y");
+  if (lq.endsWith("er") && lq.length > 4) forms.push(lq.slice(0, -2));
+  if (lq.endsWith("est") && lq.length > 5) forms.push(lq.slice(0, -3));
+  return forms;
+}
+/* 意味欄を「語義」単位に分解し、タグや記号を落として比較用に整える */
+function jaSenses(mean) {
+  return mean.split(/[\/,，]/).map(s =>
+    s.replace(/〈[^〉]*〉|《[^》]*》|\([^)]*\)|（[^）]*）|\[[^\]]*\]|\{[^}]*\}/g, "")
+     .replace(/[『』「」…・=＝'\s]/g, "")
+  ).filter(Boolean);
+}
+function dictSearch(q) {
+  const lines = loadDict();
+  const exact = [], partial = [];
+  const isEn = /^[A-Za-z0-9 .'&-]+$/.test(q);
+  if (isEn) {
+    const lq = q.toLowerCase();
+    const forms = enForms(lq);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const tab = line.indexOf("\t");
+      const w = line.slice(0, tab).toLowerCase();
+      if (forms.indexOf(w) !== -1) exact.push(line);
+      else if (w.indexOf(lq) === 0 && partial.length < 20) partial.push(line);
+    }
+  } else {
+    /* 日本語: まず「語義がぴったり一致」する単語を最優先で集め、
+       説明文に含むだけのものは別枠・短い意味の単語から順に */
+    const cq = q.replace(/[『』「」…・\s]/g, "");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const tab = line.indexOf("\t");
+      if (line.indexOf(q, tab) === -1) continue;
+      const mean = line.slice(tab + 1);
+      if (jaSenses(mean).indexOf(cq) !== -1) {
+        if (exact.length < 30) exact.push(line);
+      } else if (partial.length < 60) {
+        partial.push(line);
+      }
+    }
+    partial.sort((a, b) => a.length - b.length);
+    partial.length = Math.min(partial.length, 30);
+  }
+  return { exact, partial, isEn };
+}
+function dictEntryRow(line) {
+  const tab = line.indexOf("\t");
+  const word = line.slice(0, tab);
+  const mean = line.slice(tab + 1).split(" / ").join("／");
+  const row = document.createElement("div");
+  row.className = "dict-entry";
+  const text = document.createElement("div");
+  text.className = "d-text";
+  const dw = document.createElement("div");
+  dw.className = "d-word";
+  dw.textContent = (JP_LINE_SET.has(line) ? "🇯🇵 " : "") + word;
+  const dm = document.createElement("div");
+  dm.className = "d-mean";
+  dm.textContent = mean;
+  text.appendChild(dw);
+  text.appendChild(dm);
+  const btn = document.createElement("button");
+  btn.className = "p-speak";
+  btn.setAttribute("aria-label", "発音を聞く");
+  btn.textContent = "🔊";
+  btn.addEventListener("click", () => speak(word));
+  row.appendChild(text);
+  row.appendChild(btn);
+  return row;
+}
+function runDictSearch() {
+  const q = document.getElementById("dictInput").value.trim();
+  const box = document.getElementById("dictResults");
+  box.innerHTML = "";
+  if (!q) return;
+  if (!dictBaseLoaded) {
+    const note = document.createElement("p");
+    note.className = "dict-msg";
+    note.textContent = "本体辞書を読みこみ中…見つからないときは少し待ってもう一度おしてね";
+    box.appendChild(note);
+  }
+  const r = dictSearch(q);
+  if (!r.exact.length && !r.partial.length) {
+    const nf = document.createElement("p");
+    nf.className = "dict-msg";
+    nf.innerHTML = "見つからなかった…🙏<br>つづりを確かめて、もう一度さがしてみてね。";
+    box.appendChild(nf);
+    return;
+  }
+  if (r.exact.length && !r.isEn) {
+    const exLabel = document.createElement("div");
+    exLabel.className = "dict-section-label";
+    exLabel.textContent = "「" + q + "」にぴったりの単語";
+    box.appendChild(exLabel);
+  }
+  r.exact.forEach(line => box.appendChild(dictEntryRow(line)));
+  if (r.partial.length) {
+    const label = document.createElement("div");
+    label.className = "dict-section-label";
+    label.textContent = r.isEn
+      ? (r.exact.length ? "似ている単語" : "「" + q + "」で始まる単語")
+      : (r.exact.length ? "説明に「" + q + "」が出てくる単語" : "「" + q + "」をふくむ単語");
+    box.appendChild(label);
+    r.partial.forEach(line => box.appendChild(dictEntryRow(line)));
+  }
+}
+document.getElementById("dictGo").addEventListener("click", runDictSearch);
+document.getElementById("dictInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") { e.preventDefault(); runDictSearch(); e.target.blur(); }
+});
+
+/* ================= 写真から翻訳 ================= */
+const GAS_URL = ""; /* ← GASウェブアプリのURLをここに貼る(gas/camera-translate.gs参照) */
+function camMsg(html) {
+  document.getElementById("camResult").innerHTML = '<p class="dict-msg">' + html + "</p>";
+}
+document.getElementById("camInput").addEventListener("change", e => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  if (!GAS_URL) { camMsg("この機能はただいま準備中…🙏<br>もうすこし待っててね"); return; }
+  camMsg("読み取り中…⏳（10秒くらいかかるよ）");
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    const MAX = 1400;
+    const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+    const cv = document.createElement("canvas");
+    cv.width = Math.round(img.width * scale);
+    cv.height = Math.round(img.height * scale);
+    cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+    URL.revokeObjectURL(url);
+    const dataUrl = cv.toDataURL("image/jpeg", 0.85);
+    fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ image: dataUrl }) })
+      .then(r => r.json())
+      .then(res => {
+        if (!res.ok) throw new Error(res.error || "error");
+        if (!res.text) { camMsg("文字が見つからなかった…📷<br>明るいところで大きくうつしてみてね"); return; }
+        const box = document.getElementById("camResult");
+        box.innerHTML = "";
+        const en = document.createElement("div");
+        en.className = "dict-entry";
+        en.innerHTML = '<div class="d-text"><div class="d-mean">読み取った英語</div><div class="d-word" style="font-size:15px"></div></div>';
+        en.querySelector(".d-word").textContent = res.text;
+        const sp = document.createElement("button");
+        sp.className = "p-speak";
+        sp.setAttribute("aria-label", "読み上げ");
+        sp.textContent = "🔊";
+        sp.addEventListener("click", () => speak(res.text.slice(0, 300)));
+        en.appendChild(sp);
+        const ja = document.createElement("div");
+        ja.className = "dict-entry";
+        ja.innerHTML = '<div class="d-text"><div class="d-mean">日本語やく</div><div class="d-word" style="font-size:15px"></div></div>';
+        ja.querySelector(".d-word").textContent = res.ja;
+        box.appendChild(en);
+        box.appendChild(ja);
+      })
+      .catch(() => camMsg("うまくいかなかった…📡<br>電波のよいところでもう一度ためしてね"));
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); camMsg("この写真は読みこめなかった…別の写真でためしてね"); };
+  img.src = url;
+});
+
+/* ================= オフライン対応 ================= */
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+
+/* ================= 起動 ================= */
+updateStarCount();
+renderCatGrid();
+renderPhrases();
+renderDialogues();
+show("screen-cats");
+</script>
