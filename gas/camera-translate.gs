@@ -26,8 +26,9 @@ function doPost(e) {
     var blob = Utilities.newBlob(Utilities.base64Decode(b64), "image/jpeg", "eigonomori-ocr.jpg");
 
     // 画像をOCRつきでGoogleドキュメントに変換して文字を取り出す
+    // (mimeTypeは指定しない: ocr:true が画像→ドキュメント変換を行う)
     var file = Drive.Files.insert(
-      { title: "eigonomori-ocr-temp", mimeType: "application/vnd.google-apps.document" },
+      { title: "eigonomori-ocr-temp" },
       blob,
       { ocr: true, ocrLanguage: "en" }
     );
