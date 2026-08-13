@@ -570,10 +570,11 @@
     <!-- クイズ: カテゴリ選択 -->
     <section class="screen" id="screen-quiz-pick">
       <h2 class="title">クイズに挑戦！🎯</h2>
-      <p class="note">英語の意味を当てよう（全10問）</p>
+      <p class="note">モードをえらんで、カテゴリをタップ！（全10問）</p>
       <div class="mode-row">
         <button class="mode-pill active" id="modeNormal">👀 見て+聞いて</button>
-        <button class="mode-pill" id="modeListen">🎧 聞き取りチャレンジ</button>
+        <button class="mode-pill" id="modeListen">🎧 聞き取り</button>
+        <button class="mode-pill" id="modeCloze">🧩 穴うめ</button>
       </div>
       <div class="cat-grid" id="quizCatGrid"></div>
     </section>
@@ -585,6 +586,7 @@
       <div class="quiz-q-card">
         <div class="card-emoji" id="quizEmoji"></div>
         <div class="card-en" id="quizEn"></div>
+        <div class="card-kana" id="quizJa" style="margin-top:6px"></div>
         <div class="word-controls" style="margin-top:10px">
           <button class="round-btn btn-speak" id="quizSpeak" aria-label="もう一度聞く">🔊</button>
         </div>
@@ -645,7 +647,13 @@
       <div class="quiz-next-row" style="margin:18px 0 6px">
         <button class="btn-primary" id="reviewBtn">📝 今日の振り返りクイズ</button>
       </div>
-      <p class="note" style="text-align:center">今日 見た・覚えた・まちがえた単語から<br>自動で問題を作るよ（まちがえた単語を優先）</p>
+      <p class="note" style="text-align:center">今日の単語と、にがて単語から<br>自動で問題を作るよ（にがて単語を優先）</p>
+      <div class="quiz-next-row" style="margin:4px 0 6px">
+        <button class="btn-primary" id="weakBtn" style="background:var(--lavender)">💪 にがて単語クイズ</button>
+      </div>
+      <div class="dict-section-label">にがてな単語</div>
+      <p class="note">クイズでまちがえた単語がここにたまるよ。<br>2回連続で正解すると、リストから消える！</p>
+      <div id="weakList"></div>
       <div class="dict-section-label">これまでの記録</div>
       <div id="logHistory"></div>
       <div class="dict-section-label">バックアップ・ひっこし 🎒</div>
@@ -1260,10 +1268,36 @@ function logQuiz(key, ok) {
   else if (key && l.wrong.indexOf(key) === -1) l.wrong.push(key);
   saveLog();
 }
+
+/* ---- にがて単語（まちがえた単語を日をまたいで覚えておく） ----
+   w=まちがえた回数 / c=連続正解数。2回連続で正解したらリストから卒業 */
+const WEAK_KEY = "eigonomori_weak";
+let weakWords = {};
+try { weakWords = JSON.parse(localStorage.getItem(WEAK_KEY) || "{}") || {}; } catch (e) {}
+function saveWeak() { try { localStorage.setItem(WEAK_KEY, JSON.stringify(weakWords)); } catch (e) {} }
+function weakMarkWrong(key) {
+  if (!KEY_WORD_MAP.has(key)) return;
+  const e = weakWords[key] || { w: 0, c: 0 };
+  e.w++; e.c = 0;
+  weakWords[key] = e;
+  saveWeak();
+}
+function weakMarkCorrect(key) {
+  const e = weakWords[key];
+  if (!e) return;
+  e.c++;
+  if (e.c >= 2) delete weakWords[key];
+  saveWeak();
+}
+function weakKeys() {
+  return Object.keys(weakWords).filter(k => KEY_WORD_MAP.has(k))
+    .sort((a, b) => weakWords[b].w - weakWords[a].w);
+}
+
 function reviewKeys() {
   const l = todayLog();
   const keys = [];
-  l.wrong.concat(l.star, l.seen).forEach(k => { if (keys.indexOf(k) === -1 && KEY_WORD_MAP.has(k)) keys.push(k); });
+  weakKeys().concat(l.wrong, l.star, l.seen).forEach(k => { if (keys.indexOf(k) === -1 && KEY_WORD_MAP.has(k)) keys.push(k); });
   return keys;
 }
 function streakDays() {
@@ -1286,6 +1320,45 @@ function renderLog() {
   const n = reviewKeys().length;
   btn.disabled = !n;
   btn.textContent = n ? "📝 今日の振り返りクイズ（" + Math.min(n, 10) + "問）" : "📝 今日はまだ学習してないよ";
+  /* にがて単語 */
+  const wk = weakKeys();
+  const wb = document.getElementById("weakBtn");
+  wb.disabled = !wk.length;
+  wb.textContent = wk.length ? "💪 にがて単語クイズ（" + Math.min(wk.length, 10) + "問）" : "💪 にがて単語はゼロ！";
+  const wl = document.getElementById("weakList");
+  wl.innerHTML = "";
+  if (!wk.length) {
+    wl.innerHTML = '<p class="dict-msg">いまは にがてな単語はないよ！すごい 🎉</p>';
+  }
+  wk.slice(0, 20).forEach(k => {
+    const w = KEY_WORD_MAP.get(k);
+    const row = document.createElement("div");
+    row.className = "dict-entry";
+    const text = document.createElement("div");
+    text.className = "d-text";
+    const dw = document.createElement("div");
+    dw.className = "d-word";
+    dw.textContent = w[0];
+    const dm = document.createElement("div");
+    dm.className = "d-mean";
+    dm.textContent = w[2] + "（" + w[1] + "）・まちがい" + weakWords[k].w + "回";
+    text.appendChild(dw);
+    text.appendChild(dm);
+    const sp = document.createElement("button");
+    sp.className = "p-speak";
+    sp.setAttribute("aria-label", "発音を聞く");
+    sp.textContent = "🔊";
+    sp.addEventListener("click", () => speak(w[0]));
+    row.appendChild(text);
+    row.appendChild(sp);
+    wl.appendChild(row);
+  });
+  if (wk.length > 20) {
+    const more = document.createElement("p");
+    more.className = "dict-msg";
+    more.textContent = "…ほか" + (wk.length - 20) + "語";
+    wl.appendChild(more);
+  }
   const hist = document.getElementById("logHistory");
   hist.innerHTML = "";
   const days = Object.keys(studyLog).sort().reverse().slice(0, 14);
@@ -1313,10 +1386,11 @@ document.getElementById("logBack").addEventListener("click", () => {
   show("screen-cats");
 });
 document.getElementById("reviewBtn").addEventListener("click", () => startReviewQuiz());
+document.getElementById("weakBtn").addEventListener("click", () => startWeakQuiz());
 
 /* ---- バックアップ・ひっこしコード ---- */
 function exportCode() {
-  const data = { v: 1, learned: [...learned], log: studyLog };
+  const data = { v: 1, learned: [...learned], log: studyLog, weak: weakWords };
   return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
 }
 document.getElementById("exportBtn").addEventListener("click", () => {
@@ -1360,8 +1434,10 @@ document.getElementById("importGo").addEventListener("click", () => {
       a.qc = Math.max(a.qc, b.qc || 0);
       a.qt = Math.max(a.qt, b.qt || 0);
     });
+    Object.keys(data.weak || {}).forEach(k => { if (!weakWords[k]) weakWords[k] = data.weak[k]; });
     saveLearned();
     saveLog();
+    saveWeak();
     updateStarCount();
     renderLog();
     document.getElementById("portArea").style.display = "none";
@@ -1472,14 +1548,16 @@ document.getElementById("cardsBack").addEventListener("click", () => {
 /* ================= クイズ ================= */
 const QUIZ_LEN = 10;
 let quiz = null;
-let quizMode = "normal"; /* normal | listen */
+let quizMode = "normal"; /* normal | listen | cloze */
 
 document.getElementById("modeNormal").addEventListener("click", () => setQuizMode("normal"));
 document.getElementById("modeListen").addEventListener("click", () => setQuizMode("listen"));
+document.getElementById("modeCloze").addEventListener("click", () => setQuizMode("cloze"));
 function setQuizMode(m) {
   quizMode = m;
   document.getElementById("modeNormal").classList.toggle("active", m === "normal");
   document.getElementById("modeListen").classList.toggle("active", m === "listen");
+  document.getElementById("modeCloze").classList.toggle("active", m === "cloze");
 }
 
 function renderQuizCatGrid() {
@@ -1516,21 +1594,79 @@ function buildQuestions(ordered, dPoolBase) {
     return { w, choices: shuffle([w, ...wrongs]) };
   });
 }
+
+/* ---- 穴うめ（スペルの一部を当てる） ---- */
+/* 単語から「文字だけが連続している場所」を選んでかくす。短い単語ほどかくす文字は少なく */
+function clozeChunkOfLen(word, n) {
+  const starts = [];
+  for (let i = 0; i + n <= word.length; i++) {
+    if (/^[A-Za-z]+$/.test(word.slice(i, i + n))) starts.push(i);
+  }
+  if (!starts.length) return null;
+  const s = starts[Math.floor(Math.random() * starts.length)];
+  return { s, n, chunk: word.slice(s, s + n).toLowerCase() };
+}
+function clozeChunk(word) {
+  const letters = word.replace(/[^A-Za-z]/g, "").length;
+  let n = letters <= 3 ? 1 : letters <= 6 ? 2 : 3;
+  for (; n >= 1; n--) {
+    const cz = clozeChunkOfLen(word, n);
+    if (cz) return cz;
+  }
+  return null;
+}
+function clozeDisplay(word, s, n) {
+  return word.slice(0, s) + "＿".repeat(n) + word.slice(s + n);
+}
+function clozeChoices(cz) {
+  const all = CATS.flatMap(c => c.words);
+  const set = new Set([cz.chunk]);
+  const out = [cz.chunk];
+  let guard = 0;
+  while (out.length < 4 && guard++ < 300) {
+    const o = all[Math.floor(Math.random() * all.length)][0];
+    const c = clozeChunkOfLen(o, cz.n);
+    if (c && !set.has(c.chunk)) { set.add(c.chunk); out.push(c.chunk); }
+  }
+  return shuffle(out);
+}
+function buildClozeQuestions(ordered) {
+  return ordered.filter(w => /[A-Za-z]/.test(w[0])).slice(0, QUIZ_LEN).map(w => {
+    const cz = clozeChunk(w[0]);
+    return { w, cz, choices: clozeChoices(cz) };
+  });
+}
+
 function startQuiz(cat) {
   const pool = cat ? cat.words : CATS.flatMap(c => c.words);
-  quiz = { questions: buildQuestions(shuffle(pool), pool), i: 0, results: [], listen: quizMode === "listen" };
+  if (quizMode === "cloze") {
+    quiz = { questions: buildClozeQuestions(shuffle(pool)), i: 0, results: [], listen: false, cloze: true };
+  } else {
+    quiz = { questions: buildQuestions(shuffle(pool), pool), i: 0, results: [], listen: quizMode === "listen", cloze: false };
+  }
   renderQuizQ();
   show("screen-quiz");
 }
-/* 今日の振り返り: まちがえた単語を先頭に、見た・おぼえた単語から出題 */
+/* 今日の振り返り: にがて単語・まちがえた単語を先頭に、見た・おぼえた単語から出題 */
 function startReviewQuiz() {
   const l = todayLog();
-  const wrongW = shuffle(l.wrong.map(k => KEY_WORD_MAP.get(k)).filter(Boolean));
-  const restKeys = reviewKeys().filter(k => l.wrong.indexOf(k) === -1);
+  const priKeys = [];
+  weakKeys().concat(l.wrong).forEach(k => { if (priKeys.indexOf(k) === -1 && KEY_WORD_MAP.has(k)) priKeys.push(k); });
+  const wrongW = shuffle(priKeys.map(k => KEY_WORD_MAP.get(k)).filter(Boolean));
+  const restKeys = reviewKeys().filter(k => priKeys.indexOf(k) === -1);
   const restW = shuffle(restKeys.map(k => KEY_WORD_MAP.get(k)).filter(Boolean));
   const ordered = wrongW.concat(restW);
   if (!ordered.length) return;
-  quiz = { questions: buildQuestions(ordered, ordered), i: 0, results: [], listen: false };
+  quiz = { questions: buildQuestions(ordered, ordered), i: 0, results: [], listen: false, cloze: false };
+  renderQuizQ();
+  show("screen-quiz");
+}
+/* にがて単語だけでクイズ */
+function startWeakQuiz() {
+  const ws = weakKeys().map(k => KEY_WORD_MAP.get(k)).filter(Boolean);
+  if (!ws.length) return;
+  const ordered = shuffle(ws);
+  quiz = { questions: buildQuestions(ordered, ordered), i: 0, results: [], listen: false, cloze: false };
   renderQuizQ();
   show("screen-quiz");
 }
@@ -1544,8 +1680,15 @@ function renderQuizQ() {
     else if (i === quiz.i) dot.className = "now";
     prog.appendChild(dot);
   });
-  document.getElementById("quizEmoji").textContent = quiz.listen ? "🎧" : "❓";
-  document.getElementById("quizEn").textContent = quiz.listen ? "？？？" : q.w[0];
+  if (quiz.cloze) {
+    document.getElementById("quizEmoji").textContent = q.w[3];
+    document.getElementById("quizEn").textContent = clozeDisplay(q.w[0], q.cz.s, q.cz.n);
+    document.getElementById("quizJa").textContent = q.w[2];
+  } else {
+    document.getElementById("quizEmoji").textContent = quiz.listen ? "🎧" : "❓";
+    document.getElementById("quizEn").textContent = quiz.listen ? "？？？" : q.w[0];
+    document.getElementById("quizJa").textContent = "";
+  }
   document.getElementById("quizFeedback").textContent = "";
   document.getElementById("quizNext").style.display = "none";
   const box = document.getElementById("quizChoices");
@@ -1553,7 +1696,7 @@ function renderQuizQ() {
   q.choices.forEach(c => {
     const btn = document.createElement("button");
     btn.className = "choice-btn";
-    btn.textContent = c[2];
+    btn.textContent = quiz.cloze ? c : c[2];
     btn.addEventListener("click", () => answer(btn, c, q));
     box.appendChild(btn);
   });
@@ -1562,11 +1705,14 @@ function renderQuizQ() {
 function answer(btn, c, q) {
   const buttons = document.querySelectorAll("#quizChoices .choice-btn");
   buttons.forEach(b => (b.disabled = true));
-  const ok = c[2] === q.w[2];
+  const correctText = quiz.cloze ? q.cz.chunk : q.w[2];
+  const ok = quiz.cloze ? c === q.cz.chunk : c[2] === q.w[2];
   quiz.results.push(ok);
-  logQuiz(WORD_KEY_MAP.get(q.w), ok);
+  const key = WORD_KEY_MAP.get(q.w);
+  logQuiz(key, ok);
+  if (ok) weakMarkCorrect(key); else weakMarkWrong(key);
   document.getElementById("quizEmoji").textContent = q.w[3];
-  document.getElementById("quizEn").textContent = q.w[0]; /* 聞き取りモードでも答え合わせで表示 */
+  document.getElementById("quizEn").textContent = q.w[0]; /* 答え合わせで完全な単語を表示 */
   const fb = document.getElementById("quizFeedback");
   if (ok) {
     btn.classList.add("correct");
@@ -1575,8 +1721,8 @@ function answer(btn, c, q) {
     playCorrect();
   } else {
     btn.classList.add("wrong");
-    buttons.forEach(b => { if (b.textContent === q.w[2]) b.classList.add("correct"); });
-    fb.textContent = "残念…答えは「" + q.w[2] + "」";
+    buttons.forEach(b => { if (b.textContent === correctText) b.classList.add("correct"); });
+    fb.textContent = quiz.cloze ? "残念…正しくは「" + q.w[0] + "」" : "残念…答えは「" + q.w[2] + "」";
     fb.style.color = "var(--coral)";
     playWrong();
   }
